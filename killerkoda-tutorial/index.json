@@ -48,7 +48,7 @@
     ]
   },
   "backend": {
-    "imageid": "ubuntu:20.04"
+    "imageid": "ubuntu"
   },
   "interface": {
     "layout": "ide-terminal"
