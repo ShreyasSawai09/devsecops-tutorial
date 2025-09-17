@@ -1,0 +1,33 @@
+# Grype Container Scanner Configuration
+# Configure which vulnerabilities to report
+match:
+  # Match Java vulnerabilities
+  java:
+    - "**/*.jar"
+  # Match Python vulnerabilities  
+  python:
+    - "**/*.py"
+    - "**/requirements.txt"
+    - "**/setup.py"
+  # Match Node.js vulnerabilities
+  javascript:
+    - "**/package.json"
+    - "**/package-lock.json"
+
+# Ignore certain vulnerabilities (if needed)
+ignore:
+  # Example: ignore low severity findings in development
+  # - vulnerability: "CVE-2021-12345"
+  #   reason: "false positive in test environment"
+
+# Configure output format and reporting
+output:
+  format: "json"
+  
+# Fail conditions
+fail-on-severity: "medium"
+
+# Database settings
+db:
+  auto-update: true
+  cache-dir: "/tmp/grype/db"

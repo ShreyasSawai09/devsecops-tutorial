@@ -1,0 +1,174 @@
+name: DevSecOps Security Pipeline
+
+on:
+  push:
+    branches: [ main, Main, develop ]
+  pull_request:
+    branches: [ main, Main ]
+
+jobs:
+  security-scan:
+    name: Security Vulnerability Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r vulnerable-app/requirements.txt
+        pip install semgrep
+
+    # SAST - Static Application Security Testing
+    - name: Run Semgrep SAST Scan
+      id: semgrep
+      run: |
+        semgrep --config=.semgrep.yml --json --output=semgrep-report.json vulnerable-app/ || true
+        semgrep --config=auto --json --output=semgrep-auto-report.json vulnerable-app/ || true
+      continue-on-error: true
+
+    # Dependency Scanning
+    - name: Run OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      id: depcheck
+      with:
+        project: 'VulnShop'
+        path: './vulnerable-app'
+        format: 'JSON'
+        out: 'dependency-check-report'
+        args: >
+          --enableRetired
+          --enableExperimental
+          --failOnCVSS 7
+      continue-on-error: true
+
+    # Container Scanning  
+    - name: Build Docker Image
+      run: |
+        docker build -t vulnshop:${{ github.sha }} ./vulnerable-app/
+
+    - name: Run Grype Container Scan
+      id: grype
+      run: |
+        # Install Grype
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+        # Run container scan
+        grype vulnshop:${{ github.sha }} --output json --file grype-report.json || true
+      continue-on-error: true
+
+    # Security Report Generation
+    - name: Generate Security Report
+      run: |
+        echo "# DevSecOps Security Scan Results" > security-report.md
+        echo "**Scan Date:** $(date)" >> security-report.md
+        echo "**Commit:** ${{ github.sha }}" >> security-report.md
+        echo "" >> security-report.md
+        
+        # Semgrep Results
+        echo "## SAST (Semgrep) Results" >> security-report.md
+        if [ -f semgrep-report.json ]; then
+          SEMGREP_FINDINGS=$(jq '.results | length' semgrep-report.json)
+          echo "- **Findings:** $SEMGREP_FINDINGS" >> security-report.md
+          if [ "$SEMGREP_FINDINGS" -gt 0 ]; then
+            echo "- **Critical Issues:** $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-report.json)" >> security-report.md
+          fi
+        else
+          echo "- Semgrep scan completed" >> security-report.md
+        fi
+        echo "" >> security-report.md
+        
+        # Dependency Check Results
+        echo "## Dependency Vulnerability Scan Results" >> security-report.md
+        if [ -f dependency-check-report/dependency-check-report.json ]; then
+          echo "- Dependency scan completed - see attached report" >> security-report.md
+        else
+          echo "- Dependency scan completed" >> security-report.md
+        fi
+        echo "" >> security-report.md
+        
+        # Grype Results
+        echo "## Container Scan (Grype) Results" >> security-report.md
+        if [ -f grype-report.json ]; then
+          GRYPE_VULNS=$(jq '.matches | length' grype-report.json)
+          echo "- **Container Vulnerabilities:** $GRYPE_VULNS" >> security-report.md
+        else
+          echo "- Container scan completed" >> security-report.md
+        fi
+        
+        echo "" >> security-report.md
+        echo "## Summary" >> security-report.md
+        echo "This automated security scan detected multiple intentional vulnerabilities" >> security-report.md
+        echo "in the VulnShop application, demonstrating the effectiveness of DevSecOps" >> security-report.md
+        echo "security scanning in CI/CD pipelines." >> security-report.md
+
+    # Upload all reports as artifacts
+    - name: Upload Semgrep Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: semgrep-reports
+        path: |
+          semgrep-report.json
+          semgrep-auto-report.json
+
+    - name: Upload Dependency Check Report  
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dependency-check-report
+        path: dependency-check-report/
+
+    - name: Upload Grype Report
+      uses: actions/upload-artifact@v3
+      if: always() 
+      with:
+        name: grype-report
+        path: grype-report.json
+
+    - name: Upload Security Summary
+      uses: actions/upload-artifact@v3  
+      if: always()
+      with:
+        name: security-report
+        path: security-report.md
+
+    # Security Gates - This would normally fail the build
+    # For demo purposes, we'll just report the findings
+    - name: Evaluate Security Gates
+      run: |
+        echo "=== DevSecOps Security Gate Evaluation ==="
+        
+        TOTAL_ISSUES=0
+        
+        # Check Semgrep findings
+        if [ -f semgrep-report.json ]; then
+          SEMGREP_CRITICAL=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-report.json)
+          SEMGREP_TOTAL=$(jq '.results | length' semgrep-report.json)
+          echo "Semgrep SAST: $SEMGREP_TOTAL findings ($SEMGREP_CRITICAL critical)"
+          TOTAL_ISSUES=$((TOTAL_ISSUES + SEMGREP_CRITICAL))
+        fi
+        
+        # Check container vulnerabilities
+        if [ -f grype-report.json ]; then
+          GRYPE_CRITICAL=$(jq '[.matches[] | select(.vulnerability.severity=="Critical")] | length' grype-report.json)
+          GRYPE_TOTAL=$(jq '.matches | length' grype-report.json)
+          echo "Container Scan: $GRYPE_TOTAL vulnerabilities ($GRYPE_CRITICAL critical)"
+          TOTAL_ISSUES=$((TOTAL_ISSUES + GRYPE_CRITICAL))
+        fi
+        
+        echo ""
+        echo "Total Critical Issues: $TOTAL_ISSUES"
+        
+        if [ "$TOTAL_ISSUES" -gt 0 ]; then
+          echo "   SECURITY GATE: $TOTAL_ISSUES critical vulnerabilities detected"
+          echo "   In a production environment, this would fail the build"
+          echo "   For this tutorial demo, we're allowing the pipeline to continue"
+        else
+          echo "   SECURITY GATE: No critical vulnerabilities detected"
+        fi
