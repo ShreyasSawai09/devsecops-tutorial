@@ -6,44 +6,33 @@
       {
         "title": "Introduction: Welcome to DevSecOps",
         "text": "step1.md",
-        "verify": "step1-verify.sh",
-        "hint": "step1-hint.md"
+        "verify": "step1-verify.sh"
       },
       {
         "title": "Environment Setup & Vulnerable Application",
         "text": "step2.md", 
-        "verify": "step2-verify.sh",
-        "hint": "step2-hint.md"
+        "verify": "step2-verify.sh"
       },
       {
         "title": "Static Application Security Testing (SAST) with Semgrep",
         "text": "step3.md",
-        "verify": "step3-verify.sh", 
-        "hint": "step3-hint.md"
+        "verify": "step3-verify.sh"
       },
       {
-        "title": "Dependency Vulnerability Scanning with OWASP",
-        "text": "step4.md",
-        "verify": "step4-verify.sh",
-        "hint": "step4-hint.md"
+        "title": "Dependency Vulnerability Scanning with OWASP"
       },
       {
-        "title": "Container Image Scanning with Grype", 
-        "text": "step5.md",
-        "verify": "step5-verify.sh",
-        "hint": "step5-hint.md"
+        "title": "Container Image Scanning with Grype"
       },
       {
         "title": "CI/CD Pipeline Integration & Security Gates",
         "text": "step6.md",
-        "verify": "step6-verify.sh",
-        "hint": "step6-hint.md"
+        "verify": "step6-verify.sh"
       },
       {
         "title": "Security Reporting & Remediation Strategies",
         "text": "step7.md",
-        "verify": "step7-verify.sh", 
-        "hint": "step7-hint.md"
+        "verify": "step7-verify.sh"
       }
     ],
     "intro": {
