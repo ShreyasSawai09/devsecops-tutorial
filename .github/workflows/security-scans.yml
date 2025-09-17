@@ -1,0 +1,114 @@
+name: Security Scans (OWASP DC + Grype)
+
+on:
+  push:
+    branches: [ main, Main, master ]
+  pull_request:
+    # Run on PRs to any branch (so forks/variants work)
+    branches: [ "**" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  dependency_check:
+    name: OWASP Dependency-Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java (for Dependency-Check)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Cache Dependency-Check data
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check
+          key: ${{ runner.os }}-dc-cache-${{ hashFiles('**/dependency-check.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-dc-cache-
+
+      - name: Run OWASP Dependency-Check
+        uses: jeremylong/DependencyCheck@v7.1.3
+        with:
+          project: vulnerable-app
+          path: vulnerable-app
+          format: 'HTML,JSON,SARIF'
+          out: reports/dependency-check
+          args: >-
+            --failOnCVSS 7.0
+            --enableRetired
+            --noupdate
+            --suppression dependency-check.properties
+
+      - name: Upload DC report artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-check-reports
+          path: reports/dependency-check
+
+      - name: Upload SARIF (Dependency-Check)
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: reports/dependency-check/dependency-check-report.sarif
+
+  grype_scan:
+    name: Grype Container Scan
+    runs-on: ubuntu-latest
+    needs: dependency_check
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for scanning
+        working-directory: vulnerable-app
+        run: |
+          docker build -t vulnerable-app:ci .
+
+      - name: Run Grype scan
+        uses: anchore/scan-action@v5
+        with:
+          image: vulnerable-app:ci
+          fail-build: true
+          severity-cutoff: high
+          output-format: sarif
+          by-cve: true
+          acs-report-enable: true
+
+      - name: Upload SARIF (Grype)
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: results.sarif
+
+      - name: Upload Grype artifact bundle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: grype-results
+          path: |
+            results.sarif
+            anchore-reports/**
+
+
