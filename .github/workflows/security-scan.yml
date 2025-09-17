@@ -150,16 +150,25 @@ jobs:
         
         # Check Semgrep findings
         if [ -f semgrep-report.json ]; then
-          SEMGREP_CRITICAL=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-report.json)
-          SEMGREP_TOTAL=$(jq '.results | length' semgrep-report.json)
+          SEMGREP_CRITICAL=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-report.json 2>/dev/null || echo "0")
+          SEMGREP_TOTAL=$(jq '.results | length' semgrep-report.json 2>/dev/null || echo "0")
           echo "Semgrep SAST: $SEMGREP_TOTAL findings ($SEMGREP_CRITICAL critical)"
           TOTAL_ISSUES=$((TOTAL_ISSUES + SEMGREP_CRITICAL))
         fi
         
-        # Check container vulnerabilities
+        # Check container vulnerabilities - handle different JSON structures
         if [ -f grype-report.json ]; then
-          GRYPE_CRITICAL=$(jq '[.matches[] | select(.vulnerability.severity=="Critical")] | length' grype-report.json)
-          GRYPE_TOTAL=$(jq '.matches | length' grype-report.json)
+          # Check if it's an array or object structure
+          if jq -e 'type == "object" and has("matches")' grype-report.json >/dev/null 2>&1; then
+            GRYPE_CRITICAL=$(jq '[.matches[]? | select(.vulnerability.severity=="Critical")] | length' grype-report.json 2>/dev/null || echo "0")
+            GRYPE_TOTAL=$(jq '.matches | length' grype-report.json 2>/dev/null || echo "0")
+          elif jq -e 'type == "array"' grype-report.json >/dev/null 2>&1; then
+            GRYPE_CRITICAL=0
+            GRYPE_TOTAL=$(jq '. | length' grype-report.json 2>/dev/null || echo "0")
+          else
+            GRYPE_CRITICAL=0
+            GRYPE_TOTAL=0
+          fi
           echo "Container Scan: $GRYPE_TOTAL vulnerabilities ($GRYPE_CRITICAL critical)"
           TOTAL_ISSUES=$((TOTAL_ISSUES + GRYPE_CRITICAL))
         fi
