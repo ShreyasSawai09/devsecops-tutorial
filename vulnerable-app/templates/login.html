@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Login - VulnShop{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center bg-danger text-white">
+                <h4><i class="fas fa-sign-in-alt"></i> Login to VulnShop</h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                    </div>
+                {% endif %}
+                
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-bug"></i> SQL Injection Vulnerability Alert</h6>
+                    <p class="mb-1">This login form is vulnerable to SQL injection attacks.</p>
+                    <small class="text-muted">Try: <code>' OR '1'='1' --</code> in the username field</small>
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" 
+                               placeholder="Enter username" required>
+                        <div class="form-text">Try: <code>user</code> or <code>admin</code></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Enter password" required>
+                        <div class="form-text">Try: <code>password</code> or <code>admin123</code></div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                </form>
+                
+                <hr>
+                
+                <div class="text-center">
+                    <h6>Test Accounts:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="border p-2 rounded">
+                                <strong>Regular User</strong><br>
+                                <small>user / password</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border p-2 rounded bg-light">
+                                <strong>Admin User</strong><br>
+                                <small>admin / admin123</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-lightbulb"></i> SQL Injection Examples</h5>
+            </div>
+            <div class="card-body">
+                <p>Try these payloads in the username field to bypass authentication:</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <code>' OR '1'='1' --</code>
+                        <span class="badge bg-warning ms-2">Basic bypass</span>
+                    </li>
+                    <li class="list-group-item">
+                        <code>' UNION SELECT 1,2,3,4,5 --</code>
+                        <span class="badge bg-danger ms-2">Union injection</span>
+                    </li>
+                    <li class="list-group-item">
+                        <code>admin'--</code>
+                        <span class="badge bg-info ms-2">Comment out password</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

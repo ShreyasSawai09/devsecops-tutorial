@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron bg-gradient text-white text-center py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+    <div class="container">
+        <h1 class="display-4"><i class="fas fa-shopping-cart"></i> Welcome to VulnShop</h1>
+        <p class="lead">The intentionally vulnerable e-commerce platform for DevSecOps training</p>
+        <p class="text-light">
+            <i class="fas fa-exclamation-triangle"></i>
+            This application contains deliberate security vulnerabilities for educational purposes
+        </p>
+        {% if not session.username %}
+            <a class="btn btn-light btn-lg btn-danger-custom mt-3" href="{{ url_for('login') }}">
+                <i class="fas fa-sign-in-alt"></i> Get Started - Login
+            </a>
+        {% else %}
+            <a class="btn btn-light btn-lg btn-danger-custom mt-3" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-database fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">SQL Injection</h5>
+                <p class="card-text">Experience SQL injection vulnerabilities in login and search functionality. Learn how malicious queries can bypass authentication.</p>
+                <div class="alert alert-warning">
+                    <small><i class="fas fa-info-circle"></i> Try: <code>' OR '1'='1</code></small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-terminal fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">Command Injection</h5>
+                <p class="card-text">Discover command injection flaws that allow attackers to execute system commands through web interfaces.</p>
+                <div class="alert alert-warning">
+                    <small><i class="fas fa-info-circle"></i> Admin feature available after login</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-upload fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">File Upload Vulns</h5>
+                <p class="card-text">Test unrestricted file upload vulnerabilities that can lead to remote code execution and system compromise.</p>
+                <div class="alert alert-warning">
+                    <small><i class="fas fa-info-circle"></i> Try uploading PHP/script files</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-users text-primary"></i> Test Accounts</h5>
+                <p class="card-text">Use these accounts to explore different vulnerability scenarios:</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="alert alert-info">
+                            <strong>Regular User:</strong><br>
+                            Username: <code>user</code><br>
+                            Password: <code>password</code>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-danger">
+                            <strong>Admin User:</strong><br>
+                            Username: <code>admin</code><br>
+                            Password: <code>admin123</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-shield-alt text-success"></i> Learning Objectives</h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Understand common web vulnerabilities</li>
+                    <li><i class="fas fa-check text-success"></i> Learn automated security scanning</li>
+                    <li><i class="fas fa-check text-success"></i> Implement DevSecOps practices</li>
+                    <li><i class="fas fa-check text-success"></i> Configure CI/CD security gates</li>
+                    <li><i class="fas fa-check text-success"></i> Master vulnerability management</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <h5><i class="fas fa-graduation-cap"></i> DevSecOps Tutorial Features</h5>
+    <p class="mb-2">This application serves as the foundation for learning:</p>
+    <div class="row">
+        <div class="col-md-4">
+            <ul class="list-unstyled">
+                <li><i class="fas fa-code text-primary"></i> SAST (Static Analysis)</li>
+                <li><i class="fas fa-boxes text-primary"></i> Dependency Scanning</li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <ul class="list-unstyled">
+                <li><i class="fas fa-docker text-primary"></i> Container Image Scanning</li>
+                <li><i class="fas fa-cogs text-primary"></i> CI/CD Integration</li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <ul class="list-unstyled">
+                <li><i class="fas fa-chart-line text-primary"></i> Security Reporting</li>
+                <li><i class="fas fa-ban text-primary"></i> Build Failure Gates</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

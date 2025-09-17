@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VulnShop{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-tachometer-alt"></i> Welcome, {{ username }}!</h2>
+            {% if session.role == 'admin' %}
+                <span class="badge bg-danger fs-6">Administrator</span>
+            {% else %}
+                <span class="badge bg-primary fs-6">Regular User</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-search"></i> Search Products</h5>
+            </div>
+            <div class="card-body">
+                <p>Search our product catalog (vulnerable to SQL injection):</p>
+                <form action="{{ url_for('search') }}" method="GET">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="q" placeholder="Search products...">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-2">
+                    <small class="text-muted">Try: <code>' UNION SELECT 1,2,3 --</code></small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-user"></i> Profile Management</h5>
+            </div>
+            <div class="card-body">
+                <p>View and manage your profile information:</p>
+                <a href="{{ url_for('profile') }}" class="btn btn-success">
+                    <i class="fas fa-user-circle"></i> View Profile
+                </a>
+                <div class="mt-2">
+                    <small class="text-muted">Try accessing other users: <code>?id=1</code></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5><i class="fas fa-upload"></i> File Upload</h5>
+            </div>
+            <div class="card-body">
+                <p>Upload files to the server (unrestricted upload vulnerability):</p>
+                <a href="{{ url_for('upload_file') }}" class="btn btn-warning">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload Files
+                </a>
+                <div class="mt-2">
+                    <small class="text-muted">Try uploading: <code>.php</code>, <code>.jsp</code>, or script files</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if session.role == 'admin' %}
+    <div class="col-md-6 mb-4">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-terminal"></i> Admin Command Panel</h5>
+            </div>
+            <div class="card-body">
+                <p>Execute system commands (command injection vulnerability):</p>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="commandInput" placeholder="Enter command...">
+                    <button class="btn btn-danger" onclick="executeCommand()">
+                        <i class="fas fa-play"></i> Execute
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">Try: <code>ls</code>, <code>whoami</code>, <code>cat /etc/passwd</code></small>
+                </div>
+                <div id="commandOutput" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-list"></i> Available API Endpoints</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>User API (No Authentication Required)</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <code>GET /api/user/1</code>
+                                <span class="badge bg-warning ms-2">IDOR Vuln</span>
+                            </li>
+                            <li class="list-group-item">
+                                <code>GET /api/user/2</code>
+                                <span class="badge bg-info ms-2">Try different IDs</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Redirect Functionality</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <code>GET /redirect?url=http://evil.com</code>
+                                <span class="badge bg-danger ms-2">Open Redirect</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if session.role == 'admin' %}
+<script>
+function executeCommand() {
+    const command = document.getElementById('commandInput').value;
+    const outputDiv = document.getElementById('commandOutput');
+    
+    if (!command.trim()) {
+        alert('Please enter a command');
+        return;
+    }
+    
+    fetch('/execute', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command: command })
+    })
+    .then(response => response.json())
+    .then(data => {
+        let output = '';
+        if (data.output) {
+            output += '<div class="alert alert-success"><h6>Output:</h6><pre>' + data.output + '</pre></div>';
+        }
+        if (data.error) {
+            output += '<div class="alert alert-danger"><h6>Error:</h6><pre>' + data.error + '</pre></div>';
+        }
+        if (data.return_code !== undefined) {
+            output += '<div class="alert alert-info">Return code: ' + data.return_code + '</div>';
+        }
+        outputDiv.innerHTML = output;
+    })
+    .catch(error => {
+        outputDiv.innerHTML = '<div class="alert alert-danger">Request failed: ' + error + '</div>';
+    });
+}
+
+// Allow Enter key to execute command
+document.getElementById('commandInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        executeCommand();
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

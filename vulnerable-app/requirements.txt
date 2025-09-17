@@ -1,0 +1,7 @@
+Flask==2.3.2
+Werkzeug==2.3.6
+Jinja2==3.1.2
+requests==2.28.1
+# Vulnerability: Using vulnerable/outdated dependencies that still install cleanly
+urllib3==1.26.5
+setuptools==65.5.0
