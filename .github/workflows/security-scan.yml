@@ -109,7 +109,7 @@ jobs:
 
     # Upload all reports as artifacts
     - name: Upload Semgrep Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: semgrep-reports
@@ -118,21 +118,21 @@ jobs:
           semgrep-auto-report.json
 
     - name: Upload Dependency Check Report  
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: dependency-check-report
         path: dependency-check-report/
 
     - name: Upload Grype Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always() 
       with:
         name: grype-report
         path: grype-report.json
 
     - name: Upload Security Summary
-      uses: actions/upload-artifact@v3  
+      uses: actions/upload-artifact@v4  
       if: always()
       with:
         name: security-report
@@ -166,9 +166,9 @@ jobs:
         echo "Total Critical Issues: $TOTAL_ISSUES"
         
         if [ "$TOTAL_ISSUES" -gt 0 ]; then
-          echo "   SECURITY GATE: $TOTAL_ISSUES critical vulnerabilities detected"
+          echo "⚠️  SECURITY GATE: $TOTAL_ISSUES critical vulnerabilities detected"
           echo "   In a production environment, this would fail the build"
           echo "   For this tutorial demo, we're allowing the pipeline to continue"
         else
-          echo "   SECURITY GATE: No critical vulnerabilities detected"
+          echo "✅ SECURITY GATE: No critical vulnerabilities detected"
         fi
