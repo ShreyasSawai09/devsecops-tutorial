@@ -19,12 +19,6 @@
         "verify": "step3-verify.sh"
       },
       {
-        "title": "Dependency Vulnerability Scanning with OWASP"
-      },
-      {
-        "title": "Container Image Scanning with Grype"
-      },
-      {
         "title": "CI/CD Pipeline Integration & Security Gates",
         "text": "step6.md",
         "verify": "step6-verify.sh"
