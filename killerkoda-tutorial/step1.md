@@ -161,7 +161,7 @@ echo "Grype: $(grype version | head -1)"
 
 ### Project Repository Setup
 
-Clone the vulnerable application repository that we'll secure throughout this tutorial:
+Clone the vulnerable application repository that we'll investigate throughout this tutorial:
 
 Clone the DevSecOps tutorial repository
 ```bash
