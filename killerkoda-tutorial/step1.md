@@ -93,23 +93,23 @@ Let's prepare your development environment with all necessary tools and dependen
 
 Verify your environment has the required foundations:
 
+Check Python installation
 ```bash
-# Check Python installation
 python3 --version
 ```{{exec}}
 
+Check Git availability
 ```bash
-# Check Git availability
 git --version
 ```{{exec}}
 
+Check Docker installation
 ```bash
-# Check Docker installation
 docker --version
 ```{{exec}}
 
+Check system package manager
 ```bash
-# Check system package manager
 apt --version
 ```{{exec}}
 
@@ -117,40 +117,40 @@ apt --version
 
 Install the security scanning tools we'll use throughout this tutorial:
 
+Install Semgrep for Static Application Security Testing
 ```bash
-# Install Semgrep for Static Application Security Testing
 pip3 install --user semgrep --break-system-packages
 ```{{exec}}
 
+Add Semgrep to PATH and make it permanent
 ```bash
-# Add Semgrep to PATH and make it permanent
 export PATH="/root/.local/bin:$PATH"
 echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
 ```{{exec}}
 
+Verify Semgrep installation
 ```bash
-# Verify Semgrep installation
 semgrep --version
 ```{{exec}}
 
+Install OWASP Dependency Check
 ```bash
-# Install OWASP Dependency Check
 wget -O dependency-check.zip https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
 ```{{exec}}
 
+Extract and set up Dependency Check
 ```bash
-# Extract and set up Dependency Check
 unzip dependency-check.zip && sudo mv dependency-check /opt/
 sudo ln -sf /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
 ```{{exec}}
 
+Install Grype for container scanning
 ```bash
-# Install Grype for container scanning
 curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 ```{{exec}}
 
+Verify all security tools are installed
 ```bash
-# Verify all security tools are installed
 echo "=== SECURITY TOOLS VERIFICATION ==="
 echo "Semgrep: $(semgrep --version | head -1)"
 echo "Dependency Check: $(dependency-check --version 2>/dev/null | head -1 || echo 'Installed')"
@@ -162,18 +162,18 @@ echo "All tools ready for DevSecOps implementation!"
 
 Clone the vulnerable application repository that we'll secure throughout this tutorial:
 
+Clone the DevSecOps tutorial repository
 ```bash
-# Clone the DevSecOps tutorial repository
 git clone https://github.com/anica279p/devsecops-pipeline-tutorial.git
 ```{{exec}}
 
+Navigate to the project directory
 ```bash
-# Navigate to the project directory
 cd devsecops-pipeline-tutorial
 ```{{exec}}
 
+Explore the project structure
 ```bash
-# Explore the project structure
 echo "=== PROJECT STRUCTURE ==="
 find . -type f -name "*.md" -o -name "*.yml" -o -name "*.py" -o -name "*.txt" | head -20
 ```{{exec}}
@@ -272,21 +272,45 @@ Automated checkpoints in CI/CD pipelines that:
 
 Verify your complete environment setup:
 
+Print validation header:
 ```bash
-# Create a comprehensive environment check
 echo "=== DEVSECOPS ENVIRONMENT VALIDATION ==="
 echo ""
+```{{exec}}
+
+Check project structure:
+```bash
 echo "📁 Project Structure:"
-ls -la devsecops-pipeline-tutorial/
+ls -la
 echo ""
+```{{exec}}
+
+Verify Semgrep installation:
+```bash
 echo "🔧 Security Tools:"
 echo "  ✓ Semgrep: $(which semgrep > /dev/null && echo 'Ready' || echo 'Missing')"
+```{{exec}}
+
+Verify OWASP Dependency Check installation:
+```bash
 echo "  ✓ Dependency Check: $(which dependency-check > /dev/null && echo 'Ready' || echo 'Missing')"
+```{{exec}}
+
+Verify Grype installation:
+```bash
 echo "  ✓ Grype: $(which grype > /dev/null && echo 'Ready' || echo 'Missing')"
 echo ""
+```{{exec}}
+
+Check Docker availability:
+```bash
 echo "🐳 Container Platform:"
 echo "  ✓ Docker: $(docker --version | cut -d' ' -f3 | cut -d',' -f1)"
 echo ""
+```{{exec}}
+
+Display completion message:
+```bash
 echo "🔍 Ready for security scanning implementation!"
 ```{{exec}}
 
