@@ -31,15 +31,18 @@ fi
 
 # Easter egg verification (optional)
 if [ -f "/tmp/easter_egg_attempt.txt" ]; then
-    ANSWER=$(cat /tmp/easter_egg_attempt.txt)
-    if [[ "$ANSWER" == *"D3v53c0p5_M4st3r_2024"* ]]; then
+    ANSWER=$(cat /tmp/easter_egg_attempt.txt | tr -d '\n\r' | xargs)
+    if [ "$ANSWER" = "skip" ]; then
+        echo "📝 Easter egg hunt was skipped"
+    elif [[ "$ANSWER" == *"D3v53c0p5_M4st3r_2024"* ]]; then
         echo "🎉 Easter Egg Found! You discovered the hidden signature!"
         echo "Bonus achievement unlocked: Security Documentation Detective"
-    else
+    elif [ -n "$ANSWER" ]; then
         echo "💡 Easter egg hint: The signature might be hiding in a documentation file..."
+        echo "💡 Look for files that contain project information or instructions..."
     fi
 else
-    echo "📝 Easter egg hunt was skipped or not attempted"
+    echo "📝 Easter egg hunt was not attempted"
 fi
 
 echo ""

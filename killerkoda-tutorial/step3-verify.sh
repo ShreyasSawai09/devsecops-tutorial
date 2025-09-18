@@ -22,11 +22,6 @@ if [ ! -f "semgrep-combined-results.json" ]; then
     exit 1
 fi
 
-# Calculate vulnerability counts from the actual results
-VULN_COUNT=$(jq '.results | length' semgrep-combined-results.json 2>/dev/null || echo "0")
-CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json 2>/dev/null || echo "0")
-
 echo "Step 3 Complete: SAST scanning with Semgrep successful"
-echo "Found $VULN_COUNT total vulnerabilities ($CRITICAL_COUNT critical)"
 echo "Custom Semgrep rules working correctly"
 echo "Ready to proceed to dependency vulnerability scanning!"
