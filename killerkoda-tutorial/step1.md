@@ -154,11 +154,9 @@ curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh 
 
 Verify all security tools are installed
 ```bash
-echo "=== SECURITY TOOLS VERIFICATION ==="
 echo "Semgrep: $(semgrep --version | head -1)"
 echo "Dependency Check: $(dependency-check --version 2>/dev/null | head -1 || echo 'Installed')"
 echo "Grype: $(grype version | head -1)"
-echo "All tools ready for DevSecOps implementation!"
 ```{{exec}}
 
 ### Project Repository Setup
@@ -273,12 +271,6 @@ Automated checkpoints in CI/CD pipelines that:
 ## Environment Validation
 
 Verify your complete environment setup:
-
-Print validation header:
-```bash
-echo "=== DEVSECOPS ENVIRONMENT VALIDATION ==="
-echo ""
-```{{exec}}
 
 Check project structure:
 ```bash

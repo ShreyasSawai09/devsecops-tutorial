@@ -177,24 +177,16 @@ Remediation Priority: IMMEDIATE
 ### Command Line Integration Options
 Demonstrate different Semgrep output formats for CI/CD integration
 1. JSON Format (for automation):
-```bash
 semgrep --config=auto --json vulnerable-app/"
-```{{exec}}
 
 2. SARIF Format (for GitHub Security tab):
-```bash
 echo "   semgrep --config=auto --sarif vulnerable-app/"
-```{{exec}}
 
 3. GitLab SAST Format:
-```bash
 semgrep --config=auto --gitlab-sast vulnerable-app/"
-```{{exec}}
 
 4. JUnit XML (for test integration):
-```bash
 semgrep --config=auto --junit-xml vulnerable-app/"
-```{{exec}}
 
 ### Security Gate Implementation
 
@@ -318,19 +310,14 @@ Demonstrate Semgrep performance optimization
 semgrep --config=auto --exclude='*.log' --exclude='test_*' vulnerable-app/
 ```{{exec}}
 
-2. Scanning specific file types only:
-```bash
-semgrep --config=auto --include='*.py' vulnerable-app/"
-```{{exec}}
-
-3. Using specific rule sets for targeted scanning:
+2. Using specific rule sets for targeted scanning:
 ```bash
 semgrep --config=p/security-audit vulnerable-app/
 ```{{exec}}
 
 
 # Measure scan performance
-4. Performance measurement:
+3. Performance measurement:
 ```bash
 time semgrep --config=.semgrep.yml vulnerable-app/ --quiet >/dev/null
 ```{{exec}}
