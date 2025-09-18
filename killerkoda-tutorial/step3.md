@@ -1,282 +1,475 @@
 # Step 3: Static Application Security Testing (SAST) with Semgrep
 
-## What is SAST?
+## Understanding Static Application Security Testing
 
-**Static Application Security Testing (SAST)** analyzes source code without executing it to find security vulnerabilities. Unlike Dynamic Application Security Testing (DAST) which tests running applications, SAST can find vulnerabilities early in the development process.
+**Static Application Security Testing (SAST)** analyzes source code without executing the application to identify security vulnerabilities. Unlike dynamic testing that requires a running application, SAST provides:
 
-### SAST Benefits:
-- **Early Detection** - Find vulnerabilities during development
-- **Complete Coverage** - Analyze all code paths, including rarely executed ones
-- **Fast Feedback** - Results available in minutes, not hours
-- **Precise Location** - Shows exact line numbers of vulnerable code
+- **Early detection** of vulnerabilities during development
+- **Complete code coverage** including rarely executed paths  
+- **Precise vulnerability location** with exact line numbers
+- **Fast feedback** integrated into developer workflows
+- **Scalable analysis** across large codebases
 
-## Introducing Semgrep
+## Introduction to Semgrep
 
-Semgrep is a powerful SAST tool that uses pattern-based static analysis. It's particularly effective because it:
-- **Understands Code Structure** - Not just text matching
-- **Low False Positives** - Smart pattern matching reduces noise
-- **Customizable Rules** - Write rules for your specific security needs
-- **Multi-Language Support** - Python, JavaScript, Java, Go, and more
+Semgrep is a modern SAST tool that uses pattern-based static analysis to find security vulnerabilities, bugs, and code quality issues. It stands out because it:
 
-## Installing and Configuring Semgrep
+- **Understands code structure** rather than just text patterns
+- **Supports multiple languages** including Python, JavaScript, Java, Go, C++
+- **Provides low false positives** through intelligent pattern matching
+- **Allows custom rules** for organization-specific security requirements
+- **Integrates seamlessly** with CI/CD pipelines
 
-Semgrep is already pre-installed in your environment. Let's verify:
+### Semgrep Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        SEMGREP ANALYSIS ENGINE                      │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐ │
+│  │   SOURCE CODE   │    │   SEMGREP       │    │   VULNERABILITY │ │
+│  │     INPUT       │───▶│   RULES         │───▶│    REPORTS      │ │
+│  │                 │    │                 │    │                 │ │
+│  │ • Python Files  │    │ • Pattern Match │    │ • JSON Output   │ │
+│  │ • Config Files  │    │ • AST Analysis  │    │ • SARIF Format  │ │
+│  │ • Templates     │    │ • Data Flow     │    │ • CLI Reports   │ │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘ │
+│                                 │                                   │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │                    RULE SOURCES                             │   │
+│  │                                                             │   │
+│  │ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │   │
+│  │ │ COMMUNITY   │ │   CUSTOM    │ │      ORGANIZATION       │ │   │
+│  │ │   RULES     │ │   RULES     │ │        POLICIES         │ │   │
+│  │ │             │ │             │ │                         │ │   │
+│  │ │ • p/security│ │ • .semgrep  │ │ • Company Standards     │ │   │
+│  │ │ • p/owasp   │ │   .yml      │ │ • Regulatory Compliance │ │   │
+│  │ │ • p/secrets │ │ • Custom    │ │ • Industry Best Practice│ │   │
+│  │ └─────────────┘ └─────────────┘ └─────────────────────────┘ │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## Semgrep Rule Structure and Customization
+
+Before running scans, let's understand how Semgrep rules work and examine our custom configuration:
+
 ```bash
-semgrep --version
+# Return to the project root to access configuration files
+cd ../
 ```{{exec}}
 
-## Understanding Semgrep Rules
-
-Semgrep rules are written in YAML and use pattern matching. Let's examine the custom rules we've created for our vulnerable application:
-
 ```bash
-cd /root/devsecops-workspace/devsecops-pipeline-tutorial
+# Examine the custom Semgrep rules we've created
+echo "=== CUSTOM SEMGREP RULES ANALYSIS ==="
 cat .semgrep.yml
 ```{{exec}}
 
-### Rule Breakdown
+### Rule Anatomy Breakdown
 
-Each rule contains:
-- **id**: Unique identifier
-- **patterns**: What code patterns to match
-- **message**: Description of the vulnerability
-- **languages**: Which programming languages this rule applies to
-- **severity**: ERROR, WARNING, or INFO
+Let's examine one rule in detail to understand the pattern matching:
 
-Let's look at one rule in detail:
-```yaml
+```bash
+# Extract and explain a specific rule
+echo "=== RULE STRUCTURE EXPLANATION ==="
+echo ""
+echo "Example: SQL Injection Detection Rule"
+echo "───────────────────────────────────────"
+cat << 'EOF'
 - id: sql-injection-string-concat
   patterns:
     - pattern-either:
         - pattern: $CURSOR.execute(... + $VAR + ...)
         - pattern: $CURSOR.execute($STR % $VAR)
-  message: SQL injection vulnerability: String concatenation used in SQL query construction.
+  message: |
+    SQL injection vulnerability: String concatenation used in SQL query.
   languages: [python]
   severity: ERROR
-```
 
-This rule detects SQL injection by finding database cursor execute calls that use string concatenation.
-
-## Running Your First SAST Scan
-
-Let's run Semgrep on our vulnerable application:
-
-```bash
-semgrep --config=.semgrep.yml vulnerable-app/
-```{{exec}}
-
-You should see several vulnerabilities detected! Let's also run with community rules:
-
-```bash
-semgrep --config=auto vulnerable-app/
-```{{exec}}
-
-## Analyzing SAST Results
-
-Let's get more detailed output in JSON format for easier analysis:
-
-```bash
-semgrep --config=.semgrep.yml --json vulnerable-app/ > semgrep-results.json
-```{{exec}}
-
-View the results:
-```bash
-cat semgrep-results.json | jq '.'
-```{{exec}}
-
-Count the vulnerabilities by severity:
-```bash
-echo "=== SEMGREP SCAN RESULTS ==="
-echo "Total findings: $(jq '.results | length' semgrep-results.json)"
-echo "Critical (ERROR): $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json)"
-echo "Warnings: $(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-results.json)"
-```{{exec}}
-
-Let's examine each finding:
-```bash
-echo "=== DETAILED FINDINGS ==="
-jq -r '.results[] | "File: \(.path)\nLine: \(.start.line)\nSeverity: \(.extra.severity)\nIssue: \(.check_id)\nMessage: \(.extra.message)\n---"' semgrep-results.json
-```{{exec}}
-
-## Understanding the Detected Vulnerabilities
-
-### 1. SQL Injection Detection
-Semgrep found SQL injection vulnerabilities where user input is directly concatenated into SQL queries. This is exactly the type of critical security flaw that can lead to data breaches.
-
-### 2. Command Injection
-The tool detected the dangerous `subprocess.run()` call with `shell=True` that allows arbitrary command execution.
-
-### 3. Hardcoded Secrets
-Found the hardcoded Flask secret key that should be stored in environment variables.
-
-### 4. Insecure Deserialization
-Detected the dangerous `pickle.loads()` call that can lead to remote code execution.
-
-### 5. Debug Mode Configuration
-Identified Flask debug mode being enabled, which should never happen in production.
-
-## Creating Custom Security Rules
-
-Let's create an additional custom rule to detect a specific pattern in our application. Create a new rule file:
-
-```bash
-cat > custom-rules.yml << 'EOF'
-rules:
-  - id: dangerous-admin-functions
-    patterns:
-      - pattern: |
-          @app.route($PATH, methods=[..., "POST", ...])
-          def $FUNC(...):
-            ...
-            if session['role'] != 'admin':
-              ...
-            ...
-            $DANGEROUS_CALL
-      - metavariable-pattern:
-          metavariable: $DANGEROUS_CALL
-          patterns:
-            - pattern-either:
-                - pattern: subprocess.run(...)
-                - pattern: pickle.loads(...)
-                - pattern: eval(...)
-    message: |
-      Dangerous function in admin-only endpoint. Admin privilege escalation
-      could allow remote code execution.
-    languages: [python]
-    severity: ERROR
+BREAKDOWN:
+• id: Unique identifier for this rule
+• patterns: What code patterns to match
+• pattern-either: Match any of these patterns
+• $CURSOR, $VAR: Metavariables that match any expression
+• message: Description shown to developers
+• severity: ERROR/WARNING/INFO classification
 EOF
 ```{{exec}}
 
-Run the custom rule:
+## Running Comprehensive SAST Scans
+
+Now let's perform systematic security analysis using different Semgrep configurations:
+
+### Scan 1: Custom Rules Analysis
+
 ```bash
-semgrep --config=custom-rules.yml vulnerable-app/
+# Run our custom security rules against the vulnerable application
+echo "=== CUSTOM RULES SAST SCAN ==="
+semgrep --config=.semgrep.yml vulnerable-app/ --json > semgrep-custom-results.json
 ```{{exec}}
 
-## SAST Integration Best Practices
-
-### 1. Rule Configuration Strategy
 ```bash
-echo "=== SEMGREP CONFIGURATION STRATEGIES ==="
+# Display formatted results from custom rules
+echo "=== CUSTOM RULES FINDINGS ==="
+jq -r '.results[] | "
+VULNERABILITY: \(.check_id)
+File: \(.path)
+Line: \(.start.line)
+Severity: \(.extra.severity)
+Message: \(.extra.message)
+────────────────────────────────────────
+"' semgrep-custom-results.json
+```{{exec}}
+
+### Scan 2: Community Security Rules
+
+```bash
+# Run community security rules for broader coverage
+echo "=== COMMUNITY SECURITY RULES SCAN ==="
+semgrep --config=p/security-audit --config=p/secrets vulnerable-app/ --json > semgrep-community-results.json
+```{{exec}}
+
+```bash
+# Analyze community rule findings
+echo "=== COMMUNITY RULES ANALYSIS ==="
+echo "Total findings: $(jq '.results | length' semgrep-community-results.json)"
 echo ""
-echo "1. Use community rules for broad coverage:"
-echo "   semgrep --config=auto"
+echo "Findings by severity:"
+echo "• Critical: $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-community-results.json)"
+echo "• Warning: $(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-community-results.json)"
+echo "• Info: $(jq '[.results[] | select(.extra.severity=="INFO")] | length' semgrep-community-results.json)"
+```{{exec}}
+
+### Scan 3: OWASP Top 10 Focused Analysis
+
+```bash
+# Run OWASP-specific rules
+echo "=== OWASP TOP 10 FOCUSED SCAN ==="
+semgrep --config=p/owasp-top-ten vulnerable-app/ --json > semgrep-owasp-results.json
+```{{exec}}
+
+```bash
+# Categorize OWASP findings
+echo "=== OWASP TOP 10 VULNERABILITY MAPPING ==="
+jq -r '.results[] | "
+OWASP Category: \(.check_id)
+Vulnerability: \(.extra.message | split(".")[0])
+File: \(.path | split("/")[-1])
+Risk Level: \(.extra.severity)
+────────────────────────────────────────
+"' semgrep-owasp-results.json
+```{{exec}}
+
+## Comprehensive Vulnerability Analysis
+
+Let's create a unified analysis of all detected vulnerabilities:
+
+```bash
+# Combine all scan results for comprehensive analysis
+echo "=== COMPREHENSIVE SAST RESULTS ANALYSIS ==="
 echo ""
-echo "2. Use specific rulesets:"
-echo "   semgrep --config=p/security-audit"
-echo "   semgrep --config=p/secrets"
+
+# Merge results from all scans
+jq -s '.[0].results + .[1].results + .[2].results | unique_by(.check_id + .path + (.start.line | tostring))' \
+   semgrep-custom-results.json semgrep-community-results.json semgrep-owasp-results.json > semgrep-combined-results.json
+
+TOTAL_FINDINGS=$(jq '.results | length' semgrep-combined-results.json)
+CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)
+WARNING_COUNT=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-combined-results.json)
+
+echo "SCAN SUMMARY"
+echo "═══════════════════════════════════════════════════"
+echo "Total Unique Vulnerabilities: $TOTAL_FINDINGS"
+echo "Critical (ERROR): $CRITICAL_COUNT"
+echo "Warning: $WARNING_COUNT"
 echo ""
-echo "3. Combine community + custom rules:"
-echo "   semgrep --config=auto --config=.semgrep.yml"
 ```{{exec}}
 
-### 2. Output Formats
-Semgrep supports multiple output formats for different use cases:
+### Critical Vulnerability Deep Dive
 
 ```bash
-# JSON for CI/CD automation
-semgrep --config=auto --json vulnerable-app/ > results.json
+# Analyze critical vulnerabilities in detail
+echo "=== CRITICAL VULNERABILITIES ANALYSIS ==="
+echo ""
+jq -r '.results[] | select(.extra.severity=="ERROR") | "
+🔴 CRITICAL: \(.check_id)
+Location: \(.path):\(.start.line)
+Issue: \(.extra.message)
+Impact: " + (
+  if (.check_id | contains("sql-injection")) then "Data breach, authentication bypass"
+  elif (.check_id | contains("command-injection")) then "Remote code execution"
+  elif (.check_id | contains("pickle")) then "Remote code execution via deserialization"
+  else "High security risk"
+  end
+) + "
 
-# SARIF for GitHub security tab integration  
-semgrep --config=auto --sarif vulnerable-app/ > results.sarif
-
-# GitLab SAST format
-semgrep --config=auto --gitlab-sast vulnerable-app/ > gl-sast-report.json
+Remediation Priority: IMMEDIATE
+────────────────────────────────────────────────────────
+"' semgrep-combined-results.json
 ```{{exec}}
 
-## Fixing a Critical Vulnerability
+## SAST Integration and Automation
 
-Let's demonstrate how to fix one of the SQL injection vulnerabilities. First, let's look at the vulnerable code:
+### Command Line Integration Options
 
 ```bash
-grep -n -A 3 -B 3 "SELECT.*FROM users WHERE" vulnerable-app/app.py
+# Demonstrate different Semgrep output formats for CI/CD integration
+echo "=== SAST INTEGRATION FORMATS ==="
+echo ""
+
+echo "1. JSON Format (for automation):"
+echo "   semgrep --config=auto --json vulnerable-app/"
+echo ""
+
+echo "2. SARIF Format (for GitHub Security tab):"
+echo "   semgrep --config=auto --sarif vulnerable-app/"
+echo ""
+
+echo "3. GitLab SAST Format:"
+echo "   semgrep --config=auto --gitlab-sast vulnerable-app/"
+echo ""
+
+echo "4. JUnit XML (for test integration):"
+echo "   semgrep --config=auto --junit-xml vulnerable-app/"
 ```{{exec}}
 
-The vulnerable line uses string formatting. Here's how to fix it:
+### Security Gate Implementation
 
 ```bash
-cat > sql-injection-fix.py << 'EOF'
-# VULNERABLE CODE (what Semgrep detected):
-# query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
-# cursor.execute(query)
-
-# SECURE CODE (proper parameterized query):
-cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
-EOF
-
-cat sql-injection-fix.py
-```{{exec}}
-
-## Security Gate Configuration
-
-In a real CI/CD pipeline, you'd configure security gates based on Semgrep findings:
-
-```bash
-cat > security-gate-example.sh << 'EOF'
+# Create a security gate script for CI/CD integration
+cat > sast-security-gate.sh << 'EOF'
 #!/bin/bash
-# Example security gate logic
+echo "=== SAST SECURITY GATE EVALUATION ==="
 
-# Run Semgrep and save results
-semgrep --config=auto --json vulnerable-app/ > semgrep-results.json
+# Run Semgrep and capture results
+semgrep --config=auto --json vulnerable-app/ > gate-scan-results.json
 
-# Count critical findings
-CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json)
+# Extract metrics
+TOTAL_ISSUES=$(jq '.results | length' gate-scan-results.json)
+CRITICAL_ISSUES=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' gate-scan-results.json)
+HIGH_ISSUES=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' gate-scan-results.json)
 
-echo "Critical SAST findings: $CRITICAL_COUNT"
+echo "Scan Results:"
+echo "• Total Issues: $TOTAL_ISSUES"
+echo "• Critical: $CRITICAL_ISSUES"  
+echo "• High: $HIGH_ISSUES"
+echo ""
 
-# Security gate: fail if any critical vulnerabilities found
-if [ "$CRITICAL_COUNT" -gt 0 ]; then
-    echo "SECURITY GATE FAILED: Critical vulnerabilities detected"
-    echo "Please fix the following critical issues before deployment:"
-    jq -r '.results[] | select(.extra.severity=="ERROR") | "- \(.check_id) in \(.path):\(.start.line)"' semgrep-results.json
+# Security gate logic
+if [ "$CRITICAL_ISSUES" -gt 0 ]; then
+    echo "SECURITY GATE FAILED"
+    echo "   Critical vulnerabilities detected: $CRITICAL_ISSUES"
+    echo "   Build should be blocked in CI/CD pipeline"
+    echo ""
+    echo "Critical Issues:"
+    jq -r '.results[] | select(.extra.severity=="ERROR") | "   • \(.check_id) (\(.path):\(.start.line))"' gate-scan-results.json
+    exit 1
+elif [ "$HIGH_ISSUES" -gt 5 ]; then
+    echo "SECURITY GATE WARNING"
+    echo "   High severity issues exceed threshold: $HIGH_ISSUES > 5"
+    echo "   Consider reviewing before deployment"
     exit 1
 else
-    echo "SECURITY GATE PASSED: No critical vulnerabilities detected"
+    echo "SECURITY GATE PASSED"
+    echo "   Security findings within acceptable limits"
+    exit 0
 fi
 EOF
 
-chmod +x security-gate-example.sh
-./security-gate-example.sh
+chmod +x sast-security-gate.sh
 ```{{exec}}
-
-As expected, our security gate fails because we have critical vulnerabilities!
-
-## Easter Egg Clue #1 🕵️
-
-Notice in the Semgrep results that there's a pattern in the admin endpoints. The vulnerable application has a special admin function that accepts serialized data. Combined with the hardcoded secret key, this might be more dangerous than it appears...
-
-*Keep this in mind as we explore dependency vulnerabilities in the next step.*
-
-## SAST Scan Summary
-
-Let's generate a summary of our SAST findings:
 
 ```bash
-echo "=== SAST SECURITY SCAN SUMMARY ==="
-echo "Scan Tool: Semgrep"
-echo "Target: VulnShop Application"
-echo "Scan Date: $(date)"
-echo ""
-echo "FINDINGS:"
-echo "- Total Issues: $(jq '.results | length' semgrep-results.json)"
-echo "- Critical (ERROR): $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json)" 
-echo "- Warnings: $(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-results.json)"
-echo ""
-echo "TOP CRITICAL ISSUES:"
-jq -r '.results[] | select(.extra.severity=="ERROR") | "- \(.check_id): \(.extra.message | split(".")[0])"' semgrep-results.json
-echo ""
-echo "RECOMMENDATION: Fix all ERROR-level findings before deployment"
+# Test the security gate
+echo "=== TESTING SECURITY GATE ==="
+./sast-security-gate.sh
 ```{{exec}}
 
-## Key Takeaways
+## Advanced Semgrep Techniques
 
-From this SAST implementation, you've learned:
+### Custom Rule Development
 
-1. **SAST finds critical vulnerabilities** in source code before deployment
-2. **Custom rules** can be created for organization-specific security requirements  
-3. **Multiple output formats** support different CI/CD and security tools
-4. **Security gates** can automatically block vulnerable code from reaching production
-5. **Pattern-based detection** is more accurate than simple text searching
+```bash
+# Create an additional custom rule for organization-specific patterns
+cat > advanced-custom-rules.yml << 'EOF'
+rules:
+  - id: dangerous-admin-operations
+    patterns:
+      - pattern-either:
+          - pattern: |
+              if session['role'] == 'admin':
+                ...
+                $DANGEROUS_CALL
+          - pattern: |
+              @app.route($PATH, methods=[..., "POST", ...])
+              def $FUNC(...):
+                ...
+                if $ROLE == 'admin':
+                  ...
+                  $DANGEROUS_CALL
+    metavariable-pattern:
+      metavariable: $DANGEROUS_CALL
+      patterns:
+        - pattern-either:
+            - pattern: subprocess.run(...)
+            - pattern: pickle.loads(...)
+            - pattern: eval(...)
+            - pattern: exec(...)
+    message: |
+      Dangerous operation in admin context. Admin privilege escalation
+      could allow system compromise.
+    languages: [python]
+    severity: ERROR
 
-In the next step, you'll learn about the second pillar of DevSecOps security scanning: **dependency vulnerability scanning** with OWASP Dependency Check.
+  - id: insecure-session-config
+    pattern: |
+      app.secret_key = $SECRET
+    metavariable-regex:
+      metavariable: $SECRET
+      regex: '^"[^"]{1,16}"$'
+    message: |
+      Weak secret key detected. Use cryptographically strong keys
+      of at least 32 characters.
+    languages: [python]
+    severity: WARNING
+EOF
+```{{exec}}
 
-The combination of SAST + dependency scanning provides comprehensive coverage of application security risks!
+```bash
+# Test the advanced custom rules
+echo "=== ADVANCED CUSTOM RULES SCAN ==="
+semgrep --config=advanced-custom-rules.yml vulnerable-app/ --json | jq -r '.results[] | "
+Advanced Rule: \(.check_id)
+Finding: \(.extra.message)
+Location: \(.path):\(.start.line)
+────────────────────────────────────────
+"'
+```{{exec}}
+
+### Performance and Optimization
+
+```bash
+# Demonstrate Semgrep performance optimization
+echo "=== SAST PERFORMANCE OPTIMIZATION ==="
+echo ""
+
+echo "1. Excluding files for faster scans:"
+echo "   semgrep --config=auto --exclude='*.log' --exclude='test_*' vulnerable-app/"
+echo ""
+
+echo "2. Scanning specific file types only:"
+echo "   semgrep --config=auto --include='*.py' vulnerable-app/"
+echo ""
+
+echo "3. Using specific rule sets for targeted scanning:"
+echo "   semgrep --config=p/security-audit vulnerable-app/"
+echo ""
+
+# Measure scan performance
+echo "4. Performance measurement:"
+time semgrep --config=.semgrep.yml vulnerable-app/ --quiet >/dev/null
+```{{exec}}
+
+## SAST Results Interpretation and Prioritization
+
+### Vulnerability Risk Assessment
+
+```bash
+# Create a comprehensive vulnerability assessment
+cat > vulnerability-assessment.sh << 'EOF'
+#!/bin/bash
+echo "=== SAST VULNERABILITY RISK ASSESSMENT ==="
+echo ""
+
+# Load scan results
+RESULTS_FILE="semgrep-combined-results.json"
+
+echo "VULNERABILITY BREAKDOWN BY CATEGORY:"
+echo "════════════════════════════════════════════════════"
+
+# SQL Injection Analysis
+SQL_INJ_COUNT=$(jq '[.results[] | select(.check_id | contains("sql"))] | length' $RESULTS_FILE)
+echo "🔴 SQL Injection Vulnerabilities: $SQL_INJ_COUNT"
+echo "   Risk Level: CRITICAL (CVSS 9.0+)"
+echo "   Impact: Data breach, authentication bypass"
+echo "   Remediation: Use parameterized queries"
+echo ""
+
+# Command Injection Analysis  
+CMD_INJ_COUNT=$(jq '[.results[] | select(.check_id | contains("command"))] | length' $RESULTS_FILE)
+echo "🔴 Command Injection Vulnerabilities: $CMD_INJ_COUNT"
+echo "   Risk Level: CRITICAL (CVSS 9.0+)"
+echo "   Impact: Remote code execution"
+echo "   Remediation: Input validation, avoid shell=True"
+echo ""
+
+# Hardcoded Secrets Analysis
+SECRET_COUNT=$(jq '[.results[] | select(.check_id | contains("secret"))] | length' $RESULTS_FILE)
+echo "🟡 Hardcoded Secrets: $SECRET_COUNT"
+echo "   Risk Level: HIGH (CVSS 7.0+)"
+echo "   Impact: Authentication bypass, session hijacking"
+echo "   Remediation: Use environment variables"
+echo ""
+
+# Deserialization Analysis
+PICKLE_COUNT=$(jq '[.results[] | select(.check_id | contains("pickle"))] | length' $RESULTS_FILE)
+echo "🔴 Insecure Deserialization: $PICKLE_COUNT"
+echo "   Risk Level: CRITICAL (CVSS 9.0+)"
+echo "   Impact: Remote code execution"
+echo "   Remediation: Use JSON or signed serialization"
+echo ""
+
+echo "REMEDIATION PRIORITY MATRIX:"
+echo "════════════════════════════════════════════════════"
+echo "Priority 1 (Fix immediately): SQL Injection, Command Injection, Deserialization"
+echo "Priority 2 (Fix this week): Hardcoded secrets, Authentication issues"
+echo "Priority 3 (Fix this sprint): Configuration issues, Debug mode"
+EOF
+
+chmod +x vulnerability-assessment.sh
+./vulnerability-assessment.sh
+```{{exec}}
+
+## SAST Implementation Summary
+
+Let's create a final summary of our SAST implementation:
+
+```bash
+# Generate comprehensive SAST implementation summary
+echo "=== SAST IMPLEMENTATION SUMMARY ==="
+echo ""
+echo "TOOLS CONFIGURED:"
+echo "• Semgrep installed and verified"
+echo "• Custom rules created for organization needs"
+echo "• Community rules integrated"
+echo "• Multiple output formats available"
+echo ""
+echo "SCANNING RESULTS:"
+echo "• Total vulnerabilities detected: $(jq '.results | length' semgrep-combined-results.json)"
+echo "• Critical issues requiring immediate attention: $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)"
+echo "• Security gate implementation: Complete"
+echo ""
+echo "CI/CD INTEGRATION READY:"
+echo "• JSON output for automation"
+echo "• SARIF format for GitHub integration"
+echo "• Security gate script created"
+echo "• Performance optimized"
+echo ""
+echo "SAST IMPLEMENTATION: COMPLETE"
+echo ""
+echo "Next: Dependency vulnerability scanning with OWASP Dependency Check"
+```{{exec}}
+
+## Key Achievements
+
+Through this comprehensive SAST implementation with Semgrep, you have:
+
+1. **Mastered SAST fundamentals** and understood how static analysis detects vulnerabilities
+2. **Configured custom security rules** tailored to your application's specific security requirements
+3. **Integrated community rules** for broader vulnerability coverage
+4. **Implemented security gates** that can block deployments with critical vulnerabilities
+5. **Created automated workflows** ready for CI/CD pipeline integration
+6. **Developed risk assessment capabilities** for vulnerability prioritization
+
+Your SAST implementation provides the first pillar of comprehensive DevSecOps security scanning. In the next steps, you'll add dependency vulnerability scanning and container security analysis to create complete security coverage.
