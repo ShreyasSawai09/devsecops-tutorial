@@ -69,7 +69,6 @@ cat .semgrep.yml
 
 Let's examine one rule in detail to understand the pattern matching:
 
-Extract and explain a specific rule
 Example: SQL Injection Detection Rule
 ```bash
 echo "───────────────────────────────────────"
@@ -137,7 +136,7 @@ echo "• Info: $(jq '[.results[] | select(.extra.severity=="INFO")] | length' s
 ## Comprehensive Vulnerability Analysis
 
 Let's create a unified analysis of all detected vulnerabilities:
-Combine all scan results for comprehensive analysis
+Combine both scan results for comprehensive analysis
 ```bash
 jq -s 'map(.results // []) | add | {results: .}' \
    semgrep-custom-results.json semgrep-community-results.json > semgrep-combined-results.json
@@ -221,7 +220,7 @@ echo ""
 
 # Security gate logic
 if [ "$CRITICAL_ISSUES" -gt 0 ]; then
-    echo "❌ SECURITY GATE FAILED"
+    echo "SECURITY GATE FAILED"
     echo "   Critical vulnerabilities detected: $CRITICAL_ISSUES"
     echo "   Build should be blocked in CI/CD pipeline"
     echo ""
@@ -229,12 +228,12 @@ if [ "$CRITICAL_ISSUES" -gt 0 ]; then
     jq -r '.results[] | select(.extra.severity=="ERROR") | "   • \(.check_id) (\(.path):\(.start.line))"' gate-scan-results.json
     exit 1
 elif [ "$HIGH_ISSUES" -gt 5 ]; then
-    echo "⚠️  SECURITY GATE WARNING"
+    echo "SECURITY GATE WARNING"
     echo "   High severity issues exceed threshold: $HIGH_ISSUES > 5"
     echo "   Consider reviewing before deployment"
     exit 1
 else
-    echo "✅ SECURITY GATE PASSED"
+    echo "SECURITY GATE PASSED"
     echo "   Security findings within acceptable limits"
     exit 0
 fi
@@ -247,6 +246,8 @@ Test the security gate
 ```bash
 ./sast-security-gate.sh
 ```{{exec}}
+
+You should see that the Security Gate failed, since the application is too vulnerable.
 
 ## Advanced Semgrep Techniques
 

@@ -141,8 +141,8 @@ wget -O dependency-check.zip https://github.com/jeremylong/DependencyCheck/relea
 Extract and set up Dependency Check
 ```bash
 unzip dependency-check.zip && sudo mv dependency-check /opt/
-sudo ln -sf /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
 ```{{exec}}
+
 ```bash
 sudo ln -sf /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
 ```{{exec}}
@@ -282,14 +282,11 @@ echo ""
 
 Check project structure:
 ```bash
-echo "📁 Project Structure:"
 ls -la
-echo ""
 ```{{exec}}
 
 Verify Semgrep installation:
 ```bash
-echo "🔧 Security Tools:"
 echo "  ✓ Semgrep: $(which semgrep > /dev/null && echo 'Ready' || echo 'Missing')"
 ```{{exec}}
 
@@ -301,19 +298,11 @@ echo "  ✓ Dependency Check: $(which dependency-check > /dev/null && echo 'Read
 Verify Grype installation:
 ```bash
 echo "  ✓ Grype: $(which grype > /dev/null && echo 'Ready' || echo 'Missing')"
-echo ""
 ```{{exec}}
 
 Check Docker availability:
 ```bash
-echo "🐳 Container Platform:"
 echo "  ✓ Docker: $(docker --version | cut -d' ' -f3 | cut -d',' -f1)"
-echo ""
-```{{exec}}
-
-Display completion message:
-```bash
-echo "🔍 Ready for security scanning implementation!"
 ```{{exec}}
 
 ## Next Steps

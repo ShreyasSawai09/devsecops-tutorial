@@ -10,14 +10,13 @@ The application represents a typical web application stack with common architect
 
 Let's examine the application structure and understand its components:
 
+Navigate to the vulnerable application directory
 ```bash
-# Navigate to the vulnerable application directory
 cd vulnerable-app
 ```{{exec}}
 
+Examine the application structure
 ```bash
-# Examine the application structure
-echo "=== VULNSHOP APPLICATION STRUCTURE ==="
 tree . 2>/dev/null || find . -type f | head -20
 ```{{exec}}
 
@@ -65,8 +64,8 @@ VulnShop implements examples from the **OWASP Top 10** vulnerability categories,
 **Location**: Login and Search functionality
 **Impact**: Authentication bypass, data extraction, potential database compromise
 
+Examine the vulnerable SQL query construction
 ```bash
-# Examine the vulnerable SQL query construction
 grep -n -A 3 -B 3 "SELECT.*FROM users WHERE" app.py
 ```{{exec}}
 
@@ -74,8 +73,8 @@ grep -n -A 3 -B 3 "SELECT.*FROM users WHERE" app.py
 **Location**: Admin command execution panel
 **Impact**: Remote code execution, system compromise
 
+Find the dangerous subprocess call
 ```bash
-# Find the dangerous subprocess call
 grep -n -A 5 -B 5 "subprocess.run" app.py
 ```{{exec}}
 
@@ -83,8 +82,8 @@ grep -n -A 5 -B 5 "subprocess.run" app.py
 **Location**: Admin deserialize endpoint
 **Impact**: Remote code execution via malicious pickle payloads
 
+Locate the pickle.loads vulnerability
 ```bash
-# Locate the pickle.loads vulnerability
 grep -n -A 3 -B 3 "pickle.loads" app.py
 ```{{exec}}
 
@@ -94,8 +93,8 @@ grep -n -A 3 -B 3 "pickle.loads" app.py
 **Location**: File upload functionality
 **Impact**: Remote code execution via malicious file upload
 
+Check file upload security controls
 ```bash
-# Check file upload security controls
 grep -n -A 10 -B 5 "def upload_file" app.py
 ```{{exec}}
 
@@ -103,8 +102,8 @@ grep -n -A 10 -B 5 "def upload_file" app.py
 **Location**: Profile access functionality
 **Impact**: Unauthorized data access, privacy violation
 
+Examine IDOR vulnerability in profile function
 ```bash
-# Examine IDOR vulnerability in profile function
 grep -n -A 8 -B 3 "def profile" app.py
 ```{{exec}}
 
@@ -114,8 +113,8 @@ grep -n -A 8 -B 3 "def profile" app.py
 **Location**: Application configuration
 **Impact**: Session hijacking, authentication bypass
 
+Find hardcoded secrets
 ```bash
-# Find hardcoded secrets
 grep -n "secret_key" app.py
 ```{{exec}}
 
@@ -123,8 +122,8 @@ grep -n "secret_key" app.py
 **Location**: Flask application configuration
 **Impact**: Information disclosure, potential code execution
 
+Check for debug mode configuration
 ```bash
-# Check for debug mode configuration
 grep -n "debug.*True" app.py run.py
 ```{{exec}}
 
@@ -132,9 +131,8 @@ grep -n "debug.*True" app.py run.py
 
 Examine the application's dependencies for known security vulnerabilities:
 
+Review the requirements file for vulnerable packages
 ```bash
-# Review the requirements file for vulnerable packages
-echo "=== DEPENDENCY ANALYSIS ==="
 cat requirements.txt
 ```{{exec}}
 
