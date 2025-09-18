@@ -119,7 +119,13 @@ Install the security scanning tools we'll use throughout this tutorial:
 
 ```bash
 # Install Semgrep for Static Application Security Testing
-pip3 install semgrep --break-system-packages
+pip3 install --user semgrep --break-system-packages
+```{{exec}}
+
+```bash
+# Add Semgrep to PATH and make it permanent
+export PATH="/root/.local/bin:$PATH"
+echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
 ```{{exec}}
 
 ```bash

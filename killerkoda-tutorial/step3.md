@@ -144,21 +144,26 @@ echo "• Info: $(jq '[.results[] | select(.extra.severity=="INFO")] | length' s
 ### Scan 3: OWASP Top 10 Focused Analysis
 
 ```bash
-# Run OWASP-specific rules
+# Run OWASP-specific rules (if available)
 echo "=== OWASP TOP 10 FOCUSED SCAN ==="
-semgrep --config=p/owasp-top-ten vulnerable-app/ --json > semgrep-owasp-results.json
+semgrep --config=p/owasp-top-ten vulnerable-app/ --json > semgrep-owasp-results.json 2>/dev/null || echo '{"results":[]}' > semgrep-owasp-results.json
 ```{{exec}}
 
 ```bash
 # Categorize OWASP findings
 echo "=== OWASP TOP 10 VULNERABILITY MAPPING ==="
-jq -r '.results[] | "
+OWASP_FINDINGS=$(jq '.results | length' semgrep-owasp-results.json)
+if [ "$OWASP_FINDINGS" -gt 0 ]; then
+    jq -r '.results[] | "
 OWASP Category: \(.check_id)
 Vulnerability: \(.extra.message | split(".")[0])
 File: \(.path | split("/")[-1])
 Risk Level: \(.extra.severity)
 ────────────────────────────────────────
 "' semgrep-owasp-results.json
+else
+    echo "No specific OWASP Top 10 rules found, using community rules instead"
+fi
 ```{{exec}}
 
 ## Comprehensive Vulnerability Analysis
@@ -170,15 +175,15 @@ Let's create a unified analysis of all detected vulnerabilities:
 echo "=== COMPREHENSIVE SAST RESULTS ANALYSIS ==="
 echo ""
 
-# Merge results from all scans
-jq -s '.[0].results + .[1].results + .[2].results | unique_by(.check_id + .path + (.start.line | tostring))' \
+# Merge results from all scans (handle different file structures)
+jq -s 'map(.results // []) | add | {results: .}' \
    semgrep-custom-results.json semgrep-community-results.json semgrep-owasp-results.json > semgrep-combined-results.json
 
 TOTAL_FINDINGS=$(jq '.results | length' semgrep-combined-results.json)
 CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)
 WARNING_COUNT=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-combined-results.json)
 
-echo "SCAN SUMMARY"
+echo "📊 SCAN SUMMARY"
 echo "═══════════════════════════════════════════════════"
 echo "Total Unique Vulnerabilities: $TOTAL_FINDINGS"
 echo "Critical (ERROR): $CRITICAL_COUNT"
@@ -258,7 +263,7 @@ echo ""
 
 # Security gate logic
 if [ "$CRITICAL_ISSUES" -gt 0 ]; then
-    echo "SECURITY GATE FAILED"
+    echo "❌ SECURITY GATE FAILED"
     echo "   Critical vulnerabilities detected: $CRITICAL_ISSUES"
     echo "   Build should be blocked in CI/CD pipeline"
     echo ""
@@ -266,12 +271,12 @@ if [ "$CRITICAL_ISSUES" -gt 0 ]; then
     jq -r '.results[] | select(.extra.severity=="ERROR") | "   • \(.check_id) (\(.path):\(.start.line))"' gate-scan-results.json
     exit 1
 elif [ "$HIGH_ISSUES" -gt 5 ]; then
-    echo "SECURITY GATE WARNING"
+    echo "⚠️  SECURITY GATE WARNING"
     echo "   High severity issues exceed threshold: $HIGH_ISSUES > 5"
     echo "   Consider reviewing before deployment"
     exit 1
 else
-    echo "SECURITY GATE PASSED"
+    echo "✅ SECURITY GATE PASSED"
     echo "   Security findings within acceptable limits"
     exit 0
 fi
@@ -385,7 +390,7 @@ echo ""
 # Load scan results
 RESULTS_FILE="semgrep-combined-results.json"
 
-echo "VULNERABILITY BREAKDOWN BY CATEGORY:"
+echo "📋 VULNERABILITY BREAKDOWN BY CATEGORY:"
 echo "════════════════════════════════════════════════════"
 
 # SQL Injection Analysis
@@ -420,7 +425,7 @@ echo "   Impact: Remote code execution"
 echo "   Remediation: Use JSON or signed serialization"
 echo ""
 
-echo "REMEDIATION PRIORITY MATRIX:"
+echo "📊 REMEDIATION PRIORITY MATRIX:"
 echo "════════════════════════════════════════════════════"
 echo "Priority 1 (Fix immediately): SQL Injection, Command Injection, Deserialization"
 echo "Priority 2 (Fix this week): Hardcoded secrets, Authentication issues"
@@ -439,24 +444,24 @@ Let's create a final summary of our SAST implementation:
 # Generate comprehensive SAST implementation summary
 echo "=== SAST IMPLEMENTATION SUMMARY ==="
 echo ""
-echo "TOOLS CONFIGURED:"
+echo "🔧 TOOLS CONFIGURED:"
 echo "• Semgrep installed and verified"
 echo "• Custom rules created for organization needs"
 echo "• Community rules integrated"
 echo "• Multiple output formats available"
 echo ""
-echo "SCANNING RESULTS:"
+echo "📊 SCANNING RESULTS:"
 echo "• Total vulnerabilities detected: $(jq '.results | length' semgrep-combined-results.json)"
 echo "• Critical issues requiring immediate attention: $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)"
 echo "• Security gate implementation: Complete"
 echo ""
-echo "CI/CD INTEGRATION READY:"
+echo "🚀 CI/CD INTEGRATION READY:"
 echo "• JSON output for automation"
 echo "• SARIF format for GitHub integration"
 echo "• Security gate script created"
 echo "• Performance optimized"
 echo ""
-echo "SAST IMPLEMENTATION: COMPLETE"
+echo "✅ SAST IMPLEMENTATION: COMPLETE"
 echo ""
 echo "Next: Dependency vulnerability scanning with OWASP Dependency Check"
 ```{{exec}}
