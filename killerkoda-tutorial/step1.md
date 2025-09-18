@@ -143,6 +143,9 @@ Extract and set up Dependency Check
 unzip dependency-check.zip && sudo mv dependency-check /opt/
 sudo ln -sf /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
 ```{{exec}}
+```bash
+sudo ln -sf /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
+```{{exec}}
 
 Install Grype for container scanning
 ```bash
@@ -174,7 +177,6 @@ cd devsecops-pipeline-tutorial
 
 Explore the project structure
 ```bash
-echo "=== PROJECT STRUCTURE ==="
 find . -type f -name "*.md" -o -name "*.yml" -o -name "*.py" -o -name "*.txt" | head -20
 ```{{exec}}
 

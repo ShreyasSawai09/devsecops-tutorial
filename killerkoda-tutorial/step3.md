@@ -146,8 +146,6 @@ TOTAL_FINDINGS=$(jq '.results | length' semgrep-combined-results.json)
 CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)
 WARNING_COUNT=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-combined-results.json)
 
-echo "📊 SCAN SUMMARY"
-echo "═══════════════════════════════════════════════════"
 echo "Total Unique Vulnerabilities: $TOTAL_FINDINGS"
 echo "Critical (ERROR): $CRITICAL_COUNT"
 echo "Warning: $WARNING_COUNT"
@@ -159,7 +157,7 @@ Analyze critical vulnerabilities in detail
 
 ```bash
 jq -r '.results[] | select(.extra.severity=="ERROR") | "
-🔴 CRITICAL: \(.check_id)
+CRITICAL: \(.check_id)
 Location: \(.path):\(.start.line)
 Issue: \(.extra.message)
 Impact: " + (
@@ -181,7 +179,7 @@ Remediation Priority: IMMEDIATE
 Demonstrate different Semgrep output formats for CI/CD integration
 1. JSON Format (for automation):
 ```bash
-echo "   semgrep --config=auto --json vulnerable-app/"
+semgrep --config=auto --json vulnerable-app/"
 ```{{exec}}
 
 2. SARIF Format (for GitHub Security tab):
@@ -191,12 +189,12 @@ echo "   semgrep --config=auto --sarif vulnerable-app/"
 
 3. GitLab SAST Format:
 ```bash
-echo "   semgrep --config=auto --gitlab-sast vulnerable-app/"
+semgrep --config=auto --gitlab-sast vulnerable-app/"
 ```{{exec}}
 
 4. JUnit XML (for test integration):
 ```bash
-echo "   semgrep --config=auto --junit-xml vulnerable-app/"
+semgrep --config=auto --junit-xml vulnerable-app/"
 ```{{exec}}
 
 ### Security Gate Implementation
@@ -316,17 +314,17 @@ Demonstrate Semgrep performance optimization
 
 1. Excluding files for faster scans:
 ```bash
-echo "   semgrep --config=auto --exclude='*.log' --exclude='test_*' vulnerable-app/"
+semgrep --config=auto --exclude='*.log' --exclude='test_*' vulnerable-app/
 ```{{exec}}
 
 2. Scanning specific file types only:
 ```bash
-echo "   semgrep --config=auto --include='*.py' vulnerable-app/"
+semgrep --config=auto --include='*.py' vulnerable-app/"
 ```{{exec}}
 
 3. Using specific rule sets for targeted scanning:
 ```bash
-echo "   semgrep --config=p/security-audit vulnerable-app/"
+semgrep --config=p/security-audit vulnerable-app/
 ```{{exec}}
 
 
@@ -334,65 +332,6 @@ echo "   semgrep --config=p/security-audit vulnerable-app/"
 4. Performance measurement:
 ```bash
 time semgrep --config=.semgrep.yml vulnerable-app/ --quiet >/dev/null
-```{{exec}}
-
-## SAST Results Interpretation and Prioritization
-
-### Vulnerability Risk Assessment
-Create a comprehensive vulnerability assessment
-```bash
-cat > vulnerability-assessment.sh << 'EOF'
-#!/bin/bash
-echo "=== SAST VULNERABILITY RISK ASSESSMENT ==="
-echo ""
-
-# Load scan results
-RESULTS_FILE="semgrep-combined-results.json"
-
-echo "📋 VULNERABILITY BREAKDOWN BY CATEGORY:"
-echo "════════════════════════════════════════════════════"
-
-# SQL Injection Analysis
-SQL_INJ_COUNT=$(jq '[.results[] | select(.check_id | contains("sql"))] | length' $RESULTS_FILE)
-echo "🔴 SQL Injection Vulnerabilities: $SQL_INJ_COUNT"
-echo "   Risk Level: CRITICAL (CVSS 9.0+)"
-echo "   Impact: Data breach, authentication bypass"
-echo "   Remediation: Use parameterized queries"
-echo ""
-
-# Command Injection Analysis  
-CMD_INJ_COUNT=$(jq '[.results[] | select(.check_id | contains("command"))] | length' $RESULTS_FILE)
-echo "🔴 Command Injection Vulnerabilities: $CMD_INJ_COUNT"
-echo "   Risk Level: CRITICAL (CVSS 9.0+)"
-echo "   Impact: Remote code execution"
-echo "   Remediation: Input validation, avoid shell=True"
-echo ""
-
-# Hardcoded Secrets Analysis
-SECRET_COUNT=$(jq '[.results[] | select(.check_id | contains("secret"))] | length' $RESULTS_FILE)
-echo "🟡 Hardcoded Secrets: $SECRET_COUNT"
-echo "   Risk Level: HIGH (CVSS 7.0+)"
-echo "   Impact: Authentication bypass, session hijacking"
-echo "   Remediation: Use environment variables"
-echo ""
-
-# Deserialization Analysis
-PICKLE_COUNT=$(jq '[.results[] | select(.check_id | contains("pickle"))] | length' $RESULTS_FILE)
-echo "🔴 Insecure Deserialization: $PICKLE_COUNT"
-echo "   Risk Level: CRITICAL (CVSS 9.0+)"
-echo "   Impact: Remote code execution"
-echo "   Remediation: Use JSON or signed serialization"
-echo ""
-
-echo "📊 REMEDIATION PRIORITY MATRIX:"
-echo "════════════════════════════════════════════════════"
-echo "Priority 1 (Fix immediately): SQL Injection, Command Injection, Deserialization"
-echo "Priority 2 (Fix this week): Hardcoded secrets, Authentication issues"
-echo "Priority 3 (Fix this sprint): Configuration issues, Debug mode"
-EOF
-
-chmod +x vulnerability-assessment.sh
-./vulnerability-assessment.sh
 ```{{exec}}
 
 ## SAST Implementation Summary
