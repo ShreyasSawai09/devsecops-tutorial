@@ -29,6 +29,20 @@ if [ ! -f "/tmp/examined_source" ]; then
     touch /tmp/examined_source
 fi
 
+# Easter egg verification (optional)
+if [ -f "/tmp/easter_egg_attempt.txt" ]; then
+    ANSWER=$(cat /tmp/easter_egg_attempt.txt)
+    if [[ "$ANSWER" == *"D3v53c0p5_M4st3r_2024"* ]]; then
+        echo "🎉 Easter Egg Found! You discovered the hidden signature!"
+        echo "Bonus achievement unlocked: Security Documentation Detective"
+    else
+        echo "💡 Easter egg hint: The signature might be hiding in a documentation file..."
+    fi
+else
+    echo "📝 Easter egg hunt was skipped or not attempted"
+fi
+
+echo ""
 echo "Step 2 Complete: Vulnerable application environment ready"
 echo "Source code examined and vulnerabilities identified"
 echo "Ready to proceed to SAST scanning with Semgrep!"

@@ -26,6 +26,8 @@ tree . 2>/dev/null || find . -type f | head -20
 
 **What you should see:** A typical Python Flask application structure with files like `app.py` (main application), `requirements.txt` (dependencies), `Dockerfile` (container configuration), and various templates and static files.
 
+**Tutorial Easter Egg Hunt:** It is always a good idea to read files that tell you to do so! 🕵️
+
 ### Core Application Components
 
 Understanding the application architecture helps us anticipate what types of vulnerabilities might exist in each layer:
@@ -416,3 +418,17 @@ Your vulnerable application environment is now ready for comprehensive security 
 **What's Next:** In the next step, you'll implement Static Application Security Testing (SAST) with Semgrep to automatically detect the code-level vulnerabilities we've identified through manual analysis. You'll see how automated tools can quickly and consistently find security issues that would take much longer to discover manually.
 
 The foundation is set for comprehensive automated security scanning that will transform your understanding of DevSecOps in practice!
+
+**Optional Challenge:** Would you like to participate in an easter egg hunt while exploring the application files? This is completely optional and won't affect your tutorial progress.
+```bash
+echo "Would you like to participate in the easter egg hunt? (yes/no)"
+read -r PARTICIPATE
+if [ "$PARTICIPATE" = "yes" ] || [ "$PARTICIPATE" = "y" ]; then
+    echo "Great! Find the hidden message in the application files and enter the signature you discover:"
+    read -r EASTER_EGG_ANSWER
+    echo "$EASTER_EGG_ANSWER" > /tmp/easter_egg_attempt.txt
+    echo "Your answer has been recorded! Continue with the tutorial..."
+else
+    echo "No problem! Continuing with the tutorial..."
+fi
+```{{exec}}

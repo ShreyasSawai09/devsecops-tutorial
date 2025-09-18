@@ -16,11 +16,15 @@ if [ ! -f ".semgrep.yml" ]; then
     exit 1
 fi
 
-# Check if scan was performed
-if [ ! -f "semgrep-results.json" ]; then
-    echo "Semgrep scan not performed. Run: semgrep --config=.semgrep.yml --json vulnerable-app/ > semgrep-results.json"
+# Check if scans were performed (using the actual file names from tutorial)
+if [ ! -f "semgrep-combined-results.json" ]; then
+    echo "Semgrep scan not performed. Follow Step 3 tutorial to run Semgrep scans."
     exit 1
 fi
+
+# Calculate vulnerability counts from the actual results
+VULN_COUNT=$(jq '.results | length' semgrep-combined-results.json 2>/dev/null || echo "0")
+CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json 2>/dev/null || echo "0")
 
 echo "Step 3 Complete: SAST scanning with Semgrep successful"
 echo "Found $VULN_COUNT total vulnerabilities ($CRITICAL_COUNT critical)"
