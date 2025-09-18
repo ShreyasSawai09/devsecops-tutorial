@@ -37,4 +37,4 @@ Built with Python Flask, SQLite database, and includes Docker support for contai
 
 ---
 
-*"The best way to learn about security is to break things safely. Happy hunting, security researchers! Remember: with great power comes great responsibility - use your skills to build a more secure digital world."* - **D3v53c0p5_M4st3r_2024**
+*"The best way to learn about security is to break things safely. Happy hunting, security researchers! Remember: with great power comes great responsibility - use your skills to build a more secure digital world."* - **D3v53c0p5_M4st3r_2025**
