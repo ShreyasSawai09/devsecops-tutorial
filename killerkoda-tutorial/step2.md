@@ -140,52 +140,43 @@ cat requirements.txt
 
 ### Known Vulnerable Dependencies
 
-```bash
-# Analyze specific vulnerable packages
-echo "=== VULNERABLE DEPENDENCIES ANALYSIS ==="
-echo ""
-echo "1. urllib3==1.26.5 (Known CVEs)"
-echo "   - CVE-2023-43804: Cookie request header vulnerability"
-echo "   - CVE-2023-45803: Request body not stripped after redirect"
-echo ""
-echo "2. setuptools==65.5.0 (Potential vulnerabilities)"
-echo "   - Older version may have undisclosed issues"
-echo ""
-echo "3. requests==2.28.1 (Not latest version)"
-echo "   - May be missing security patches"
-echo ""
-echo "These will be detected by OWASP Dependency Check!"
-```{{exec}}
+Analyze specific vulnerable packages
+
+1. urllib3==1.26.5 (Known CVEs)"
+    - CVE-2023-43804: Cookie request header vulnerability"
+    - CVE-2023-45803: Request body not stripped after redirect"
+2. setuptools==65.5.0 (Potential vulnerabilities)"
+    - Older version may have undisclosed issues"
+3. requests==2.28.1 (Not latest version)"
+    - May be missing security patches"
+
+These will be detected by OWASP Dependency Check!
 
 ## Container Security Analysis
 
 Examine the container configuration for security issues:
 
+Analyze the Dockerfile for security misconfigurations
 ```bash
-# Analyze the Dockerfile for security misconfigurations
-echo "=== CONTAINER SECURITY ANALYSIS ==="
 cat Dockerfile
 ```{{exec}}
 
 ### Container Security Issues
 
-```bash
-echo "=== CONTAINER VULNERABILITIES ==="
-echo ""
-echo "1. Running as root user (Security Risk)"
-echo "   - No USER directive to drop privileges"
-echo ""
-echo "2. Unrestricted network exposure"
-echo "   - EXPOSE 5000 allows broad access"
-echo ""
-echo "3. Debug mode enabled in container"
-echo "   - CMD runs with debug=True"
-echo ""
-echo "4. No version pinning for system packages"
-echo "   - apt-get without specific versions"
-echo ""
-echo "These will be detected by Grype container scanning!"
-```{{exec}}
+1. Running as root user (Security Risk)"
+    - No USER directive to drop privileges"
+
+2. Unrestricted network exposure"
+    - EXPOSE 5000 allows broad access"
+
+3. Debug mode enabled in container"
+    - CMD runs with debug=True"
+
+4. No version pinning for system packages"
+    - apt-get without specific versions"
+
+These will be detected by Grype container scanning!
+
 
 ## Application Environment Setup
 
@@ -193,28 +184,27 @@ Before we can run security scans, we need to set up the application environment 
 
 ### Python Environment Configuration
 
-```bash
-# Handle the externally-managed-environment issue in newer Ubuntu
-echo "=== SETTING UP PYTHON ENVIRONMENT ==="
-echo "Configuring Python environment for application dependencies..."
-```{{exec}}
+
+Install application dependencies with proper flags
 
 ```bash
-# Install application dependencies with proper flags
 pip3 install -r requirements.txt --break-system-packages
+```{{exec}}
+
+If there was an error during installation, install Flask specifically 
+```bash
+pip3 install --user flask --break-system-packages
 ```{{exec}}
 
 ### Application Initialization and Testing
 
+Initialize the application database
 ```bash
-# Initialize the application database
-echo "=== INITIALIZING APPLICATION ==="
 python3 -c "from app import init_db; init_db(); print('Database initialized successfully')"
 ```{{exec}}
 
+Test that the application can start (quick test)
 ```bash
-# Test that the application can start (quick test)
-echo "=== TESTING APPLICATION STARTUP ==="
 timeout 5s python3 run.py &
 sleep 2
 curl -s http://localhost:5000 > /dev/null && echo "✓ Application starts successfully" || echo "⚠ Application startup test inconclusive"
@@ -226,36 +216,34 @@ Let's systematically identify the security issues that our automated tools will 
 
 ### Static Code Analysis Preview
 
+Count potential security issues manually. 
+Let's start with SQL Injection patterns:"
 ```bash
-# Count potential security issues manually
-echo "=== MANUAL VULNERABILITY DISCOVERY ==="
-echo ""
-echo "SQL Injection patterns:"
 grep -c "SELECT.*%" app.py
-echo ""
-echo "Command execution patterns:"
+```{{exec}}
+
+Command execution patterns:
+```bash
 grep -c "subprocess\|system\|exec" app.py
-echo ""
-echo "Hardcoded secrets:"
+```{{exec}}
+
+Hardcoded secrets:
+```bash
 grep -c "secret.*=" app.py
-echo ""
-echo "Debug configurations:"
+```{{exec}}
+
+Debug configurations:
+```bash
 grep -c "debug.*True" app.py run.py
 ```{{exec}}
 
 ### Security Scanning Preparation
 
+Verify our security tools are ready
 ```bash
-# Verify our security tools are ready
-echo "=== SECURITY TOOLS READINESS CHECK ==="
-echo ""
 echo "Semgrep (SAST): $(which semgrep >/dev/null && echo 'Ready' || echo 'Missing')"
 echo "OWASP DC (SCA): $(which dependency-check >/dev/null && echo 'Ready' || echo 'Missing')"
 echo "Grype (Container): $(which grype >/dev/null && echo 'Ready' || echo 'Missing')"
-echo ""
-echo "Application setup: Complete"
-echo "Dependencies: Installed"
-echo "Configuration files: Present"
 ```{{exec}}
 
 ## Vulnerability Summary Matrix

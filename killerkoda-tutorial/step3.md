@@ -55,14 +55,13 @@ Semgrep is a modern SAST tool that uses pattern-based static analysis to find se
 
 Before running scans, let's understand how Semgrep rules work and examine our custom configuration:
 
+Return to the project root to access configuration files
 ```bash
-# Return to the project root to access configuration files
 cd ../
 ```{{exec}}
 
+Examine the custom Semgrep rules we've created
 ```bash
-# Examine the custom Semgrep rules we've created
-echo "=== CUSTOM SEMGREP RULES ANALYSIS ==="
 cat .semgrep.yml
 ```{{exec}}
 
@@ -70,11 +69,9 @@ cat .semgrep.yml
 
 Let's examine one rule in detail to understand the pattern matching:
 
+Extract and explain a specific rule
+Example: SQL Injection Detection Rule
 ```bash
-# Extract and explain a specific rule
-echo "=== RULE STRUCTURE EXPLANATION ==="
-echo ""
-echo "Example: SQL Injection Detection Rule"
 echo "───────────────────────────────────────"
 cat << 'EOF'
 - id: sql-injection-string-concat
@@ -102,16 +99,13 @@ EOF
 Now let's perform systematic security analysis using different Semgrep configurations:
 
 ### Scan 1: Custom Rules Analysis
-
+Run our custom security rules against the vulnerable application
 ```bash
-# Run our custom security rules against the vulnerable application
-echo "=== CUSTOM RULES SAST SCAN ==="
 semgrep --config=.semgrep.yml vulnerable-app/ --json > semgrep-custom-results.json
 ```{{exec}}
 
+Display formatted results from custom rules
 ```bash
-# Display formatted results from custom rules
-echo "=== CUSTOM RULES FINDINGS ==="
 jq -r '.results[] | "
 VULNERABILITY: \(.check_id)
 File: \(.path)
@@ -124,15 +118,13 @@ Message: \(.extra.message)
 
 ### Scan 2: Community Security Rules
 
+Run community security rules for broader coverage
 ```bash
-# Run community security rules for broader coverage
-echo "=== COMMUNITY SECURITY RULES SCAN ==="
 semgrep --config=p/security-audit --config=p/secrets vulnerable-app/ --json > semgrep-community-results.json
 ```{{exec}}
 
+ Analyze community rule findings
 ```bash
-# Analyze community rule findings
-echo "=== COMMUNITY RULES ANALYSIS ==="
 echo "Total findings: $(jq '.results | length' semgrep-community-results.json)"
 echo ""
 echo "Findings by severity:"
@@ -141,43 +133,14 @@ echo "• Warning: $(jq '[.results[] | select(.extra.severity=="WARNING")] | len
 echo "• Info: $(jq '[.results[] | select(.extra.severity=="INFO")] | length' semgrep-community-results.json)"
 ```{{exec}}
 
-### Scan 3: OWASP Top 10 Focused Analysis
-
-```bash
-# Run OWASP-specific rules (if available)
-echo "=== OWASP TOP 10 FOCUSED SCAN ==="
-semgrep --config=p/owasp-top-ten vulnerable-app/ --json > semgrep-owasp-results.json 2>/dev/null || echo '{"results":[]}' > semgrep-owasp-results.json
-```{{exec}}
-
-```bash
-# Categorize OWASP findings
-echo "=== OWASP TOP 10 VULNERABILITY MAPPING ==="
-OWASP_FINDINGS=$(jq '.results | length' semgrep-owasp-results.json)
-if [ "$OWASP_FINDINGS" -gt 0 ]; then
-    jq -r '.results[] | "
-OWASP Category: \(.check_id)
-Vulnerability: \(.extra.message | split(".")[0])
-File: \(.path | split("/")[-1])
-Risk Level: \(.extra.severity)
-────────────────────────────────────────
-"' semgrep-owasp-results.json
-else
-    echo "No specific OWASP Top 10 rules found, using community rules instead"
-fi
-```{{exec}}
 
 ## Comprehensive Vulnerability Analysis
 
 Let's create a unified analysis of all detected vulnerabilities:
-
+Combine all scan results for comprehensive analysis
 ```bash
-# Combine all scan results for comprehensive analysis
-echo "=== COMPREHENSIVE SAST RESULTS ANALYSIS ==="
-echo ""
-
-# Merge results from all scans (handle different file structures)
 jq -s 'map(.results // []) | add | {results: .}' \
-   semgrep-custom-results.json semgrep-community-results.json semgrep-owasp-results.json > semgrep-combined-results.json
+   semgrep-custom-results.json semgrep-community-results.json > semgrep-combined-results.json
 
 TOTAL_FINDINGS=$(jq '.results | length' semgrep-combined-results.json)
 CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)
@@ -192,11 +155,9 @@ echo ""
 ```{{exec}}
 
 ### Critical Vulnerability Deep Dive
+Analyze critical vulnerabilities in detail
 
 ```bash
-# Analyze critical vulnerabilities in detail
-echo "=== CRITICAL VULNERABILITIES ANALYSIS ==="
-echo ""
 jq -r '.results[] | select(.extra.severity=="ERROR") | "
 🔴 CRITICAL: \(.check_id)
 Location: \(.path):\(.start.line)
@@ -217,32 +178,31 @@ Remediation Priority: IMMEDIATE
 ## SAST Integration and Automation
 
 ### Command Line Integration Options
-
+Demonstrate different Semgrep output formats for CI/CD integration
+1. JSON Format (for automation):
 ```bash
-# Demonstrate different Semgrep output formats for CI/CD integration
-echo "=== SAST INTEGRATION FORMATS ==="
-echo ""
-
-echo "1. JSON Format (for automation):"
 echo "   semgrep --config=auto --json vulnerable-app/"
-echo ""
+```{{exec}}
 
-echo "2. SARIF Format (for GitHub Security tab):"
+2. SARIF Format (for GitHub Security tab):
+```bash
 echo "   semgrep --config=auto --sarif vulnerable-app/"
-echo ""
+```{{exec}}
 
-echo "3. GitLab SAST Format:"
+3. GitLab SAST Format:
+```bash
 echo "   semgrep --config=auto --gitlab-sast vulnerable-app/"
-echo ""
+```{{exec}}
 
-echo "4. JUnit XML (for test integration):"
+4. JUnit XML (for test integration):
+```bash
 echo "   semgrep --config=auto --junit-xml vulnerable-app/"
 ```{{exec}}
 
 ### Security Gate Implementation
 
+Create a security gate script for CI/CD integration
 ```bash
-# Create a security gate script for CI/CD integration
 cat > sast-security-gate.sh << 'EOF'
 #!/bin/bash
 echo "=== SAST SECURITY GATE EVALUATION ==="
@@ -285,9 +245,8 @@ EOF
 chmod +x sast-security-gate.sh
 ```{{exec}}
 
+Test the security gate
 ```bash
-# Test the security gate
-echo "=== TESTING SECURITY GATE ==="
 ./sast-security-gate.sh
 ```{{exec}}
 
@@ -295,8 +254,9 @@ echo "=== TESTING SECURITY GATE ==="
 
 ### Custom Rule Development
 
+Create an additional custom rule for organization-specific patterns
+
 ```bash
-# Create an additional custom rule for organization-specific patterns
 cat > advanced-custom-rules.yml << 'EOF'
 rules:
   - id: dangerous-admin-operations
@@ -341,9 +301,8 @@ rules:
 EOF
 ```{{exec}}
 
+Test the advanced custom rules
 ```bash
-# Test the advanced custom rules
-echo "=== ADVANCED CUSTOM RULES SCAN ==="
 semgrep --config=advanced-custom-rules.yml vulnerable-app/ --json | jq -r '.results[] | "
 Advanced Rule: \(.check_id)
 Finding: \(.extra.message)
@@ -353,35 +312,35 @@ Location: \(.path):\(.start.line)
 ```{{exec}}
 
 ### Performance and Optimization
+Demonstrate Semgrep performance optimization
 
+1. Excluding files for faster scans:
 ```bash
-# Demonstrate Semgrep performance optimization
-echo "=== SAST PERFORMANCE OPTIMIZATION ==="
-echo ""
-
-echo "1. Excluding files for faster scans:"
 echo "   semgrep --config=auto --exclude='*.log' --exclude='test_*' vulnerable-app/"
-echo ""
+```{{exec}}
 
-echo "2. Scanning specific file types only:"
+2. Scanning specific file types only:
+```bash
 echo "   semgrep --config=auto --include='*.py' vulnerable-app/"
-echo ""
+```{{exec}}
 
-echo "3. Using specific rule sets for targeted scanning:"
+3. Using specific rule sets for targeted scanning:
+```bash
 echo "   semgrep --config=p/security-audit vulnerable-app/"
-echo ""
+```{{exec}}
+
 
 # Measure scan performance
-echo "4. Performance measurement:"
+4. Performance measurement:
+```bash
 time semgrep --config=.semgrep.yml vulnerable-app/ --quiet >/dev/null
 ```{{exec}}
 
 ## SAST Results Interpretation and Prioritization
 
 ### Vulnerability Risk Assessment
-
+Create a comprehensive vulnerability assessment
 ```bash
-# Create a comprehensive vulnerability assessment
 cat > vulnerability-assessment.sh << 'EOF'
 #!/bin/bash
 echo "=== SAST VULNERABILITY RISK ASSESSMENT ==="
@@ -439,32 +398,28 @@ chmod +x vulnerability-assessment.sh
 ## SAST Implementation Summary
 
 Let's create a final summary of our SAST implementation:
+TOOLS CONFIGURED:
+  • Semgrep installed and verified
+  • Custom rules created for organization needs
+  • Community rules integrated
+  • Multiple output formats available
 
-```bash
-# Generate comprehensive SAST implementation summary
-echo "=== SAST IMPLEMENTATION SUMMARY ==="
-echo ""
-echo "🔧 TOOLS CONFIGURED:"
-echo "• Semgrep installed and verified"
-echo "• Custom rules created for organization needs"
-echo "• Community rules integrated"
-echo "• Multiple output formats available"
-echo ""
-echo "📊 SCANNING RESULTS:"
-echo "• Total vulnerabilities detected: $(jq '.results | length' semgrep-combined-results.json)"
-echo "• Critical issues requiring immediate attention: $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)"
-echo "• Security gate implementation: Complete"
-echo ""
-echo "🚀 CI/CD INTEGRATION READY:"
-echo "• JSON output for automation"
-echo "• SARIF format for GitHub integration"
-echo "• Security gate script created"
-echo "• Performance optimized"
-echo ""
-echo "✅ SAST IMPLEMENTATION: COMPLETE"
-echo ""
-echo "Next: Dependency vulnerability scanning with OWASP Dependency Check"
-```{{exec}}
+SCANNING RESULTS:
+  • Total vulnerabilities detected: $(jq '.results | length' semgrep-combined-results.json)
+  • Critical issues requiring immediate attention: $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-combined-results.json)
+  • Security gate implementation: Complete
+
+CI/CD INTEGRATION READY:
+  • JSON output for automation
+  • SARIF format for GitHub integration
+  • Security gate script created
+  • Performance optimized
+
+
+✅ SAST IMPLEMENTATION: COMPLETE
+
+Next: Dependency vulnerability scanning with OWASP Dependency Check
+
 
 ## Key Achievements
 
