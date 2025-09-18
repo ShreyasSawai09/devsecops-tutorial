@@ -355,40 +355,6 @@ echo "Grype (Container): $(which grype >/dev/null && echo 'Ready' || echo 'Missi
 - **OWASP Dependency Check (SCA)**: Scans dependencies for known vulnerabilities  
 - **Grype (Container)**: Scans container images for security issues
 
-## Vulnerability Summary Matrix
-
-Based on our analysis, let's create a clear picture of what each security tool should detect. This matrix helps us understand how different tools complement each other:
-
- ┌─────────────────────────────────────────────────────────────────────┐
- │                    VULNERABILITY DETECTION MATRIX                   │
- ├─────────────────────────────────────────────────────────────────────┤
- │                                                                     │
- │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │
- │  │      SAST       │  │   DEPENDENCY    │  │   CONTAINER     │      │
- │  │   (Semgrep)     │  │   (OWASP DC)    │  │    (Grype)      │      │
- │  ├─────────────────┤  ├─────────────────┤  ├─────────────────┤      │
- │  │ ✓ SQL Injection │  │ ✓ urllib3 CVEs  │  │ ✓ Base Image    │     │
- │  │ ✓ Command Inj   │  │ ✓ setuptools    │  │ ✓ Package Vulns │     │
- │  │ ✓ Hardcoded Key │  │ ✓ requests      │  │ ✓ Config Issues │     │
- │  │ ✓ Pickle RCE    │  │ ✓ License Check │  │ ✓ Runtime Env   │     │
- │  │ ✓ Debug Mode    │  │ ✓ Transitive    │  │ ✓ User Privs    │     │
- │  │ ✓ Open Redirect │  │   Dependencies  │  │                 │      │
- │  └─────────────────┘  └─────────────────┘  └─────────────────┘      │ 
- │                                                                     │
- │  Expected Results: ~6 findings    ~3 vulns        ~5+ issues        │
- └─────────────────────────────────────────────────────────────────────┘
-
-
-**What this matrix shows:**
-- **Different tools detect different types of vulnerabilities** - no single tool catches everything
-- **Overlapping coverage** - some issues might be detected by multiple tools
-- **Complementary scanning** - you need all three types of scanning for complete security coverage
-
-**Expected results breakdown:**
-- **SAST (Semgrep)**: Should find code-level vulnerabilities like SQL injection and hardcoded secrets
-- **SCA (OWASP Dependency Check)**: Should identify known CVEs in third-party packages
-- **Container (Grype)**: Should detect vulnerabilities in the container image and configuration
-
 ## Key Learning Outcomes
 
 From this exploration, you now understand:
@@ -418,20 +384,3 @@ Your vulnerable application environment is now ready for comprehensive security 
 **What's Next:** In the next step, you'll implement Static Application Security Testing (SAST) with Semgrep to automatically detect the code-level vulnerabilities we've identified through manual analysis. You'll see how automated tools can quickly and consistently find security issues that would take much longer to discover manually.
 
 The foundation is set for comprehensive automated security scanning that will transform your understanding of DevSecOps in practice!
-
-**Optional Challenge:** Would you like to participate in an easter egg hunt while exploring the application files? This is completely optional and won't affect your tutorial progress.
-```bash
-echo "Easter Egg Hunt - Choose your participation:"
-echo "Type 'yes' and press Enter to participate, or 'no' to skip:"
-```{{exec}}
-
-If you chose to participate, explore the application files and look for a hidden signature. When you find it, record your discovery:
-```bash
-echo "Enter the signature you discovered (or 'skip' if not participating):"
-echo -n "Your answer: " && read EASTER_EGG_ANSWER && echo "$EASTER_EGG_ANSWER" > /tmp/easter_egg_attempt.txt && echo "Answer recorded!"
-```{{exec}}
-
-If you chose to skip the easter egg hunt:
-```bash
-echo "skip" > /tmp/easter_egg_attempt.txt && echo "Easter egg hunt skipped - continuing with tutorial!"
-```{{exec}}
