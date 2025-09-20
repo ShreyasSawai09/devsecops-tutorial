@@ -187,6 +187,8 @@ jobs:
       - name: Run OWASP Dependency-Check
         run: |
           echo "=== Step 4: Running OWASP Dependency-Check ==="
+          # Ensure output directory has proper permissions
+          sudo chmod 777 dep-check-reports
           docker run --rm \
             -v "${{ github.workspace }}":/src \
             -v "${{ github.workspace }}/dep-check-reports":/report \
@@ -199,7 +201,8 @@ jobs:
             --out /report \
             --failOnCVSS 0 \
             --enableRetired \
-            --disableOssIndex
+            --disableOssIndex \
+            --prettyPrint
 
       - name: Copy reports for compatibility
         run: |
