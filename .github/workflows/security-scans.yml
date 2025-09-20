@@ -198,8 +198,7 @@ jobs:
             --format SARIF \
             --out /report \
             --failOnCVSS 0 \
-            --enableRetired \
-            --noupdate
+            --enableRetired
 
       - name: Copy reports for compatibility
         run: |
