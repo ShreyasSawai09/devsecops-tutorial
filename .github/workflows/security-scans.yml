@@ -198,7 +198,8 @@ jobs:
             --format SARIF \
             --out /report \
             --failOnCVSS 0 \
-            --enableRetired
+            --enableRetired \
+            --disableOssIndex
 
       - name: Copy reports for compatibility
         run: |
