@@ -315,9 +315,10 @@ jobs:
         with:
           image: vulnerable-app:ci
           fail-build: false
-          severity-cutoff: critical
+          severity-cutoff: high
           output-format: sarif
           by-cve: true
+          acs-report-enable: true
 
       - name: Verify Step 5 - Grype Results
         run: |
