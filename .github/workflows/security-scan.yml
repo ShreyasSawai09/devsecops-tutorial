@@ -7,6 +7,11 @@ on:
     branches: [ main, latest ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   security-scan:
     name: Security Vulnerability Scanning
@@ -82,7 +87,7 @@ jobs:
         
     - name: Upload Grype Results
       uses: github/codeql-action/upload-sarif@v3
-      if: always()
+      if: always() && hashFiles('grype-results.sarif') != ''
       with:
         sarif_file: grype-results.sarif
         
