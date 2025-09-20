@@ -2,9 +2,9 @@ name: DevSecOps Security Scanning Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, latest ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, latest ]
   workflow_dispatch:
 
 jobs:

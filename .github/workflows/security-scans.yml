@@ -2,7 +2,7 @@ name: Security Scans (OWASP DC + Grype)
 
 on:
   push:
-    branches: [ main, Main, master ]
+    branches: [ main, Main, master, latest ]
   pull_request:
     # Run on PRs to any branch (so forks/variants work)
     branches: [ "**" ]
