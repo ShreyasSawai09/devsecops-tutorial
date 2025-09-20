@@ -58,6 +58,8 @@ jobs:
         run: |
           echo "Files in reports/dependency-check:"
           ls -la reports/dependency-check/ || echo "Directory does not exist"
+          echo "Looking for SARIF files:"
+          find reports/dependency-check -name "*.sarif" 2>/dev/null || echo "No SARIF files found"
 
       - name: Upload DC report artifacts
         uses: actions/upload-artifact@v4
@@ -66,11 +68,23 @@ jobs:
           name: dependency-check-reports
           path: reports/dependency-check
 
+      - name: Find and Upload SARIF (Dependency-Check)
+        run: |
+          SARIF_FILE=$(find reports/dependency-check -name "*.sarif" | head -1)
+          if [ -n "$SARIF_FILE" ]; then
+            echo "Found SARIF file: $SARIF_FILE"
+            echo "sarif_file=$SARIF_FILE" >> $GITHUB_OUTPUT
+          else
+            echo "No SARIF file found"
+            echo "sarif_file=" >> $GITHUB_OUTPUT
+          fi
+        id: find_sarif
+
       - name: Upload SARIF (Dependency-Check)
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && steps.find_sarif.outputs.sarif_file != ''
         with:
-          sarif_file: reports/dependency-check/vulnerable-app.sarif
+          sarif_file: ${{ steps.find_sarif.outputs.sarif_file }}
 
   grype_scan:
     name: Grype Container Scan
