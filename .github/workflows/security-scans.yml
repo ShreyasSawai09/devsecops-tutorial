@@ -107,8 +107,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Semgrep
-        run: pip3 install semgrep
+      - name: Install Semgrep and jq
+        run: |
+          pip3 install semgrep
+          sudo apt-get update && sudo apt-get install -y jq
 
       - name: Run Semgrep SAST Scan
         run: |
@@ -171,10 +173,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dc-cache-
 
-      - name: Create reports directory
+      - name: Create reports directory and install jq
         run: |
           mkdir -p dep-check-reports
           mkdir -p reports/dependency-check
+          sudo apt-get update && sudo apt-get install -y jq
 
       - name: Run OWASP Dependency-Check
         run: |
@@ -263,9 +266,10 @@ jobs:
           docker build -t vulnshop:workshop .
           docker build -t vulnerable-app:ci .
 
-      - name: Install Grype
+      - name: Install Grype and jq
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          sudo apt-get update && sudo apt-get install -y jq
 
       - name: Run Grype Container Scan
         run: |
@@ -329,6 +333,9 @@ jobs:
 
       - name: Set up environment for security gates
         run: |
+          # Install jq for JSON processing
+          sudo apt-get update && sudo apt-get install -y jq
+          
           # Copy results to expected locations
           cp semgrep-results/semgrep-results.json . 2>/dev/null || true
           cp -r dependency-check-reports/dep-check-reports . 2>/dev/null || true
@@ -479,14 +486,15 @@ jobs:
       - name: Create Final Security Report
         run: |
           echo "=== Step 7: Creating Final Comprehensive Security Report ==="
-          cat > final-security-report.md << 'EOF'
+          REPORT_DATE=$(date)
+          cat > final-security-report.md << EOF
           # DevSecOps Security Pipeline - Final Report
           
           ## Executive Summary
           This report contains the results of a comprehensive DevSecOps security pipeline analysis.
           
           ## Report Generation Date
-          Generated on: $(date)
+          Generated on: $REPORT_DATE
           
           ## Security Scan Results Summary
           - ✅ SAST Scanning (Semgrep) - Completed
