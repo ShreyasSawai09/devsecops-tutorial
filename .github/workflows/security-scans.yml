@@ -41,18 +41,19 @@ jobs:
       - name: Create reports directory
         run: mkdir -p reports/dependency-check
 
-      - name: Run OWASP Dependency-Check
-        uses: dependency-check/DependencyCheck@v10.0.4
-        with:
-          project: 'vulnerable-app'
-          path: 'vulnerable-app'
-          format: 'HTML,JSON,SARIF'
-          out: 'reports/dependency-check'
-          args: >-
-            --failOnCVSS 7.0
-            --enableRetired
+      - name: Run OWASP Dependency-Check with Docker
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}":/src \
+            -v "${{ github.workspace }}/reports/dependency-check":/report \
+            owasp/dependency-check:latest \
+            --project "vulnerable-app" \
+            --scan /src/vulnerable-app \
+            --format "HTML,JSON,SARIF" \
+            --out /report \
+            --failOnCVSS 7.0 \
+            --enableRetired \
             --noupdate
-            --suppression dependency-check.properties
 
       - name: List generated files
         run: |
@@ -70,6 +71,11 @@ jobs:
 
       - name: Find and Upload SARIF (Dependency-Check)
         run: |
+          echo "Looking for SARIF files in reports/dependency-check:"
+          find reports/dependency-check -name "*.sarif" -type f || echo "No SARIF files found"
+          echo "All files in reports/dependency-check:"
+          ls -la reports/dependency-check/ || echo "Directory does not exist"
+          
           SARIF_FILE=$(find reports/dependency-check -name "*.sarif" | head -1)
           if [ -n "$SARIF_FILE" ]; then
             echo "Found SARIF file: $SARIF_FILE"
