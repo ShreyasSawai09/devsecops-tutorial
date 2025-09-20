@@ -193,7 +193,9 @@ jobs:
             owasp/dependency-check:latest \
             --project "vulnerable-app" \
             --scan /src/vulnerable-app \
-            --format "HTML,JSON,SARIF" \
+            --format HTML \
+            --format JSON \
+            --format SARIF \
             --out /report \
             --failOnCVSS 0 \
             --enableRetired \
