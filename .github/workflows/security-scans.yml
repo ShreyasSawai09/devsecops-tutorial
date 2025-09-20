@@ -290,7 +290,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
         working-directory: vulnerable-app
@@ -311,7 +311,7 @@ jobs:
           grype vulnshop:workshop -o table > grype-results.txt
 
       - name: Run Grype scan with Anchore Action
-        uses: anchore/scan-action@v5
+        uses: anchore/scan-action@v4
         with:
           image: vulnerable-app:ci
           fail-build: false

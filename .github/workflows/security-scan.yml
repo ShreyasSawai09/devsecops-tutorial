@@ -45,6 +45,7 @@ jobs:
     # Dependency Vulnerability Scanning
     - name: Install OWASP Dependency Check
       run: |
+        mkdir -p reports/dependency-check
         wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
         unzip dependency-check-8.4.0-release.zip
         chmod +x dependency-check/bin/dependency-check.sh
