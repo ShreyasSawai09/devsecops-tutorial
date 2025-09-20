@@ -385,7 +385,6 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
-          # Ensure script is executable
           chmod +x security-gate-strict.sh
           ./security-gate-strict.sh || echo "Strict gate failed as expected with vulnerabilities"
 
@@ -393,7 +392,6 @@ jobs:
         run: |
           echo "=== Step 6: Testing Threshold Security Gate ==="
           cd killerkoda-tutorial/step6-scripts
-          # Ensure script is executable
           chmod +x security-gate-threshold.sh
           ./security-gate-threshold.sh || echo "Threshold gate result logged"
 
@@ -401,7 +399,6 @@ jobs:
         run: |
           echo "=== Step 6: Testing Trend Security Gate ==="
           cd killerkoda-tutorial/step6-scripts
-          # Ensure script is executable
           chmod +x security-gate-trend.sh
           ./security-gate-trend.sh || echo "Trend gate result logged"
 
@@ -481,7 +478,6 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
-          # Ensure script is executable
           chmod +x security-dashboard.sh
           ./security-dashboard.sh > ../../security-dashboard-report.txt
 
@@ -489,7 +485,6 @@ jobs:
         run: |
           echo "=== Step 7: Generating Detailed Vulnerability Report ==="
           cd killerkoda-tutorial/step4-scripts
-          # Ensure script is executable
           chmod +x detailed-vulnerability-report.sh
           ./detailed-vulnerability-report.sh > ../../detailed-vulnerability-report.txt
 
@@ -501,7 +496,6 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
-          # Ensure script is executable
           chmod +x remediation-guide.sh
           ./remediation-guide.sh > ../../remediation-guide-report.txt
 
@@ -509,7 +503,6 @@ jobs:
         run: |
           echo "=== Step 7: Generating Executive Summary ==="
           cd killerkoda-tutorial/step7-scripts
-          # Ensure script is executable
           chmod +x executive-summary.sh
           ./executive-summary.sh > ../../executive-summary-report.txt
 
@@ -517,7 +510,6 @@ jobs:
         run: |
           echo "=== Step 7: Generating Security Improvement Plan ==="
           cd killerkoda-tutorial/step7-scripts
-          # Ensure script is executable
           chmod +x security-improvement-plan.sh
           ./security-improvement-plan.sh > ../../security-improvement-plan.txt
 
@@ -529,7 +521,6 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
-          # Ensure script is executable
           chmod +x security-metrics.sh
           ./security-metrics.sh > ../../security-metrics-report.txt
 
