@@ -385,18 +385,24 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
+          # Ensure script is executable
+          chmod +x security-gate-strict.sh
           ./security-gate-strict.sh || echo "Strict gate failed as expected with vulnerabilities"
 
       - name: Run Security Gate - Threshold Policy
         run: |
           echo "=== Step 6: Testing Threshold Security Gate ==="
           cd killerkoda-tutorial/step6-scripts
+          # Ensure script is executable
+          chmod +x security-gate-threshold.sh
           ./security-gate-threshold.sh || echo "Threshold gate result logged"
 
       - name: Run Security Gate - Trend Policy
         run: |
           echo "=== Step 6: Testing Trend Security Gate ==="
           cd killerkoda-tutorial/step6-scripts
+          # Ensure script is executable
+          chmod +x security-gate-trend.sh
           ./security-gate-trend.sh || echo "Trend gate result logged"
 
       - name: Test Notification System
@@ -475,12 +481,16 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
+          # Ensure script is executable
+          chmod +x security-dashboard.sh
           ./security-dashboard.sh > ../../security-dashboard-report.txt
 
       - name: Generate Detailed Vulnerability Report
         run: |
           echo "=== Step 7: Generating Detailed Vulnerability Report ==="
           cd killerkoda-tutorial/step4-scripts
+          # Ensure script is executable
+          chmod +x detailed-vulnerability-report.sh
           ./detailed-vulnerability-report.sh > ../../detailed-vulnerability-report.txt
 
       - name: Generate Remediation Guide
@@ -491,18 +501,24 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
+          # Ensure script is executable
+          chmod +x remediation-guide.sh
           ./remediation-guide.sh > ../../remediation-guide-report.txt
 
       - name: Generate Executive Summary
         run: |
           echo "=== Step 7: Generating Executive Summary ==="
           cd killerkoda-tutorial/step7-scripts
+          # Ensure script is executable
+          chmod +x executive-summary.sh
           ./executive-summary.sh > ../../executive-summary-report.txt
 
       - name: Generate Security Improvement Plan
         run: |
           echo "=== Step 7: Generating Security Improvement Plan ==="
           cd killerkoda-tutorial/step7-scripts
+          # Ensure script is executable
+          chmod +x security-improvement-plan.sh
           ./security-improvement-plan.sh > ../../security-improvement-plan.txt
 
       - name: Generate Security Metrics
@@ -513,6 +529,7 @@ jobs:
           cp -r ../../dep-check-reports . 2>/dev/null || true
           cp ../../grype-results.json . 2>/dev/null || true
           
+          # Ensure script is executable
           chmod +x security-metrics.sh
           ./security-metrics.sh > ../../security-metrics-report.txt
 
