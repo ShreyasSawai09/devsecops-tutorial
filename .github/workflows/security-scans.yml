@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-dc-cache-
 
       - name: Run OWASP Dependency-Check
-        uses: jeremylong/DependencyCheck@v7.1.3
+        uses: dependency-check/DependencyCheck@v10.0.4
         with:
           project: vulnerable-app
           path: vulnerable-app
