@@ -16,10 +16,10 @@ echo "Total Critical Issues: $TOTAL_CRITICAL"
 if [ "$TOTAL_CRITICAL" -gt 0 ]; then
     echo "BUILD FAILED: $TOTAL_CRITICAL critical vulnerabilities found"
     echo ""
-    echo "🚨 SECURITY GATE FAILED - ZERO TOLERANCE POLICY"
+    echo "[FAILED] SECURITY GATE FAILED - ZERO TOLERANCE POLICY"
     echo "All critical and high severity vulnerabilities must be fixed before deployment"
     exit 1
 else
     echo "BUILD PASSED: No critical vulnerabilities"
-    echo "✅ SECURITY GATE PASSED - STRICT POLICY"
+    echo "[PASSED] SECURITY GATE PASSED - STRICT POLICY"
 fi

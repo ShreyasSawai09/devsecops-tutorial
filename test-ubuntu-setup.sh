@@ -371,10 +371,10 @@ EOF
     
     if [ -f "grype-results.json" ]; then
         CONTAINER_VULNS=$(jq '.matches | length' grype-results.json 2>/dev/null || echo "0")
-        echo "- ✅ Container scan completed successfully" >> "$REPORT_FILE"
+        echo "- [SUCCESS] Container scan completed successfully" >> "$REPORT_FILE"
         echo "- Container vulnerabilities: $CONTAINER_VULNS" >> "$REPORT_FILE"
     else
-        echo "- ❌ Container scan failed or no results" >> "$REPORT_FILE"
+        echo "- [ERROR] Container scan failed or no results" >> "$REPORT_FILE"
     fi
     
     cat >> "$REPORT_FILE" << EOF
@@ -385,9 +385,9 @@ EOF
     for script in security-dashboard.sh security-metrics.sh security-gate-*.sh; do
         if [ -f "$script" ]; then
             if [ -f "${script%.sh}-output.txt" ]; then
-                echo "- ✅ $script executed successfully" >> "$REPORT_FILE"
+                echo "- [SUCCESS] $script executed successfully" >> "$REPORT_FILE"
             else
-                echo "- ❌ $script failed to execute" >> "$REPORT_FILE"
+                echo "- [ERROR] $script failed to execute" >> "$REPORT_FILE"
             fi
         fi
     done

@@ -33,11 +33,11 @@ RISK_SCORE=$(( SAST_CRITICAL * 10 + SAST_WARNING * 3 + DEP_HIGH * 7 + CONTAINER_
 TOTAL_CRITICAL=$((SAST_CRITICAL + DEP_HIGH + CONTAINER_HIGH))
 
 if [ "$RISK_SCORE" -gt 50 ]; then
-    RISK_LEVEL="🔴 HIGH"
+    RISK_LEVEL="[HIGH]"
 elif [ "$RISK_SCORE" -gt 20 ]; then
-    RISK_LEVEL="🟡 MEDIUM" 
+    RISK_LEVEL="[MEDIUM]" 
 else
-    RISK_LEVEL="🟢 LOW"
+    RISK_LEVEL="[LOW]"
 fi
 
 echo "RISK ASSESSMENT"
@@ -53,31 +53,31 @@ echo ""
 
 echo "SECURITY POSTURE"
 echo "────────────────────────────────────────────────────────────────────"
-echo "DevSecOps Implementation: ✅ ACTIVE"
-echo "├── SAST Scanning: ✅ Implemented (Semgrep)"
-echo "├── Dependency Scanning: ✅ Implemented (OWASP DC)"
-echo "└── Container Scanning: ✅ Implemented (Grype)"
+echo "DevSecOps Implementation: [ACTIVE]"
+echo "├── SAST Scanning: [IMPLEMENTED] (Semgrep)"
+echo "├── Dependency Scanning: [IMPLEMENTED] (OWASP DC)"
+echo "└── Container Scanning: [IMPLEMENTED] (Grype)"
 echo ""
 if [ "$TOTAL_CRITICAL" -gt 0 ]; then
-    echo "Security Gate Status: ❌ FAILING"
-    echo "Deployment Status: 🚫 BLOCKED"
+    echo "Security Gate Status: [FAILING]"
+    echo "Deployment Status: [BLOCKED]"
 else
-    echo "Security Gate Status: ✅ PASSING"
-    echo "Deployment Status: 🚀 APPROVED"
+    echo "Security Gate Status: [PASSING]"
+    echo "Deployment Status: [APPROVED]"
 fi
 echo ""
 
-echo "💼 BUSINESS IMPACT"
+echo "[BUSINESS] BUSINESS IMPACT"
 echo "────────────────────────────────────────────────────────────────────"
 if [ "$TOTAL_CRITICAL" -gt 0 ]; then
-    echo "Immediate Risk: 🔴 HIGH"
+    echo "Immediate Risk: [HIGH]"
     echo "• Potential for data breach and system compromise"
     echo "• Risk of regulatory compliance violations (GDPR, PCI-DSS)"
     echo "• Possible reputational damage and customer loss"
     echo "• Estimated cost of breach: \$2M - \$5M"
     echo "• Legal liability for customer data exposure"
 else
-    echo "Immediate Risk: 🟢 LOW"
+    echo "Immediate Risk: [LOW]"
     echo "• No critical vulnerabilities identified"
     echo "• Current security posture acceptable for deployment"
 fi
@@ -106,7 +106,7 @@ echo "• Regular security architecture reviews"
 echo "• Container security hardening implementation"
 echo ""
 
-echo "💰 INVESTMENT REQUIREMENTS"
+echo "[INVESTMENT] INVESTMENT REQUIREMENTS"
 echo "────────────────────────────────────────────────────────────────────"
 echo "DevSecOps Tooling: \$15,000/year (Already implemented)"
 echo "├── Semgrep Pro: \$5,000/year"
@@ -124,16 +124,16 @@ echo ""
 
 echo "COMPLIANCE STATUS"
 echo "────────────────────────────────────────────────────────────────────"
-echo "• OWASP Top 10: ⚠️  Multiple violations detected"
-echo "• PCI-DSS: ❌ Non-compliant (SQL injection vulnerabilities)"
-echo "• SOC 2: ⚠️  Security controls need improvement"
-echo "• ISO 27001: ⚠️  Vulnerability management process active"
+echo "• OWASP Top 10: [WARNING] Multiple violations detected"
+echo "• PCI-DSS: [NON-COMPLIANT] (SQL injection vulnerabilities)"
+echo "• SOC 2: [WARNING] Security controls need improvement"
+echo "• ISO 27001: [WARNING] Vulnerability management process active"
 echo ""
 
 echo "SUCCESS METRICS"
 echo "────────────────────────────────────────────────────────────────────"
-echo "• Time to detect vulnerabilities: <24 hours ✅"
-echo "• Security scan coverage: 100% of commits ✅"
+echo "• Time to detect vulnerabilities: <24 hours [ACHIEVED]"
+echo "• Security scan coverage: 100% of commits [ACHIEVED]"
 echo "• Mean time to remediation: Target <7 days for critical"
 echo "• False positive rate: Target <10%"
 echo "• Developer security training: Target 100% completion"
@@ -141,8 +141,8 @@ echo ""
 
 echo "NEXT STEPS"
 echo "────────────────────────────────────────────────────────────────────"
-echo "1. 📋 Review detailed vulnerability reports"
-echo "2. 🛠️  Implement remediation plan for critical findings"
-echo "3. 📊 Establish security metrics dashboard"
-echo "4. 🎓 Schedule security training for development team"
-echo "5. 📅 Plan regular security review meetings"
+echo "1. [ACTION] Review detailed vulnerability reports"
+echo "2. [ACTION] Implement remediation plan for critical findings"
+echo "3. [ACTION] Establish security metrics dashboard"
+echo "4. [ACTION] Schedule security training for development team"
+echo "5. [ACTION] Plan regular security review meetings"

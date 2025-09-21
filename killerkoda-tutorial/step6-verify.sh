@@ -6,23 +6,23 @@ echo "Verifying Step 6: CI/CD Pipeline Integration & Security Gates..."
 
 # Check if GitHub Actions workflow exists
 if [ ! -f ".github/workflows/security-scan.yml" ]; then
-    echo "❌ GitHub Actions workflow missing. Create .github/workflows/security-scan.yml"
+    echo "[ERROR] GitHub Actions workflow missing. Create .github/workflows/security-scan.yml"
     exit 1
 fi
 
 # Verify workflow contains all three security tools
 if ! grep -q "semgrep" .github/workflows/security-scan.yml; then
-    echo "❌ Semgrep not configured in CI/CD pipeline"
+    echo "[ERROR] Semgrep not configured in CI/CD pipeline"
     exit 1
 fi
 
 if ! grep -q "dependency-check" .github/workflows/security-scan.yml; then
-    echo "❌ OWASP Dependency Check not configured in CI/CD pipeline"
+    echo "[ERROR] OWASP Dependency Check not configured in CI/CD pipeline"
     exit 1
 fi
 
 if ! grep -q "grype" .github/workflows/security-scan.yml; then
-    echo "❌ Grype not configured in CI/CD pipeline"
+    echo "[ERROR] Grype not configured in CI/CD pipeline"
     exit 1
 fi
 
@@ -39,7 +39,7 @@ if [ -f "security-gate-trend.sh" ]; then
 fi
 
 if [ "$GATE_SCRIPTS" -lt 2 ]; then
-    echo "❌ Security gate scripts missing. Create at least 2 gate strategy scripts."
+    echo "[ERROR] Security gate scripts missing. Create at least 2 gate strategy scripts."
     exit 1
 fi
 
@@ -48,16 +48,16 @@ chmod +x security-gate-*.sh 2>/dev/null
 
 # Check if notification system is configured
 if [ ! -f "notification-example.sh" ]; then
-    echo "⚠️  Notification system not configured (optional)"
+    echo "[WARNING] Notification system not configured (optional)"
 fi
 
 # Verify security metrics script exists
 if [ ! -f "security-metrics.sh" ]; then
-    echo "⚠️  Security metrics script missing (optional)"
+    echo "[WARNING] Security metrics script missing (optional)"
 fi
 
-echo "✅ Step 6 Complete: CI/CD Pipeline Integration successful"
-echo "✅ GitHub Actions workflow configured with all security tools"
-echo "✅ Security gates implemented with multiple strategies"
-echo "✅ Pipeline ready for automated security testing"
+echo "[SUCCESS] Step 6 Complete: CI/CD Pipeline Integration successful"
+echo "[SUCCESS] GitHub Actions workflow configured with all security tools"
+echo "[SUCCESS] Security gates implemented with multiple strategies"
+echo "[SUCCESS] Pipeline ready for automated security testing"
 echo "Ready to proceed to security reporting and remediation!"

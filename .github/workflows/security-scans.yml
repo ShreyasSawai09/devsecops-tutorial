@@ -577,11 +577,11 @@ jobs:
           Generated on: $REPORT_DATE
           
           ## Security Scan Results Summary
-          - ✅ SAST Scanning (Semgrep) - Completed
-          - ✅ Dependency Scanning (OWASP DC) - Completed  
-          - ✅ Container Scanning (Grype) - Completed
-          - ✅ Security Gates - Implemented
-          - ✅ Reporting & Remediation - Generated
+          - [COMPLETED] SAST Scanning (Semgrep) - Completed
+          - [COMPLETED] Dependency Scanning (OWASP DC) - Completed  
+          - [COMPLETED] Container Scanning (Grype) - Completed
+          - [COMPLETED] Security Gates - Implemented
+          - [COMPLETED] Reporting & Remediation - Generated
           
           ## Detailed Reports
           All detailed reports have been generated and are available as artifacts.

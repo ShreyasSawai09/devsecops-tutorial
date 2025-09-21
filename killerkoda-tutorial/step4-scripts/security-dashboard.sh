@@ -10,14 +10,14 @@ echo "╚═══════════════════════�
 echo ""
 
 # SAST Results
-echo "🔍 STATIC APPLICATION SECURITY TESTING (SAST) - Semgrep"
+echo "[SAST] STATIC APPLICATION SECURITY TESTING (SAST) - Semgrep"
 echo "════════════════════════════════════════════════════════════════"
 if [ -f semgrep-results.json ]; then
     TOTAL_SAST=$(jq '.results | length' semgrep-results.json)
     CRITICAL_SAST=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json)
     WARNING_SAST=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-results.json)
     
-    echo "Status: 🔴 ISSUES FOUND"
+    echo "Status: [ISSUES FOUND]"
     echo "Total Findings: $TOTAL_SAST"
     echo "├── Critical (ERROR): $CRITICAL_SAST"
     echo "└── Warning: $WARNING_SAST"
@@ -25,12 +25,12 @@ if [ -f semgrep-results.json ]; then
     echo "Top Critical Issues:"
     jq -r '.results[] | select(.extra.severity=="ERROR") | "  • \(.check_id) (\(.path):\(.start.line))"' semgrep-results.json | head -5
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status: [NOT SCANNED]"
 fi
 echo ""
 
 # Dependency Scan Results  
-echo "📦 DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
+echo "[DEPENDENCY] DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
 echo "════════════════════════════════════════════════════════════════"
 if [ -f dep-check-reports/dependency-check-report.json ]; then
     TOTAL_DEPS=$(jq '.dependencies | length' dep-check-reports/dependency-check-report.json)
@@ -38,38 +38,38 @@ if [ -f dep-check-reports/dependency-check-report.json ]; then
     HIGH_DEPS=$(jq '[.dependencies[].vulnerabilities[] | select(.severity=="HIGH" or .severity=="CRITICAL")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
     MEDIUM_DEPS=$(jq '[.dependencies[].vulnerabilities[] | select(.severity=="MEDIUM")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
     
-    echo "Status: 🔴 VULNERABILITIES FOUND"
+    echo "Status: [VULNERABILITIES FOUND]"
     echo "Total Dependencies: $TOTAL_DEPS"
     echo "Vulnerable Dependencies: $VULNERABLE_DEPS"
     echo "├── High/Critical Severity: $HIGH_DEPS"
     echo "└── Medium Severity: $MEDIUM_DEPS"
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status: [NOT SCANNED]"
     echo "Note: Dependency scan results would show vulnerable packages"
     echo "Expected findings: urllib3, setuptools, requests, pyyaml, pillow, cryptography"
 fi
 echo ""
 
 # Container Scan Results
-echo "🐳 CONTAINER IMAGE SCANNING - Grype"  
+echo "[CONTAINER] CONTAINER IMAGE SCANNING - Grype"  
 echo "════════════════════════════════════════════════════════════════"
 if [ -f grype-results.json ]; then
     CONTAINER_VULNS=$(jq '.matches | length' grype-results.json 2>/dev/null || echo "0")
     CONTAINER_HIGH=$(jq '[.matches[] | select(.vulnerability.severity=="High" or .vulnerability.severity=="Critical")] | length' grype-results.json 2>/dev/null || echo "0")
     CONTAINER_MEDIUM=$(jq '[.matches[] | select(.vulnerability.severity=="Medium")] | length' grype-results.json 2>/dev/null || echo "0")
     
-    echo "Status: 🔴 VULNERABILITIES FOUND"
+    echo "Status: [VULNERABILITIES FOUND]"
     echo "Container Vulnerabilities: $CONTAINER_VULNS"
     echo "├── High/Critical: $CONTAINER_HIGH"
     echo "└── Medium: $CONTAINER_MEDIUM"
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status: [NOT SCANNED]"
     echo "Note: Container scan would show base image and package vulnerabilities"
 fi
 echo ""
 
 # Security Gate Status
-echo "🚦 SECURITY GATE EVALUATION"
+echo "[SECURITY GATE] SECURITY GATE EVALUATION"
 echo "════════════════════════════════════════════════════════════════"
 
 # Calculate total critical issues
@@ -85,19 +85,19 @@ if [ -f grype-results.json ]; then
 fi
 
 if [ "$TOTAL_CRITICAL" -gt 0 ]; then
-    echo "Overall Status: ❌ FAILED"
+    echo "Overall Status: [FAILED]"
     echo "Critical Issues Found: $TOTAL_CRITICAL"
     echo "Reason: Critical vulnerabilities detected across security scans"
     echo "Action Required: Fix critical findings before deployment"
-    echo "Deployment: 🚫 BLOCKED"
+    echo "Deployment: [BLOCKED]"
 else
-    echo "Overall Status: ✅ PASSED"  
-    echo "Deployment: 🚀 APPROVED"
+    echo "Overall Status: [PASSED]"  
+    echo "Deployment: [APPROVED]"
 fi
 echo ""
 
 # Remediation Priority
-echo "🎯 REMEDIATION PRIORITY MATRIX"
+echo "[REMEDIATION] REMEDIATION PRIORITY MATRIX"
 echo "════════════════════════════════════════════════════════════════"
 echo "Priority 1 (Critical): Fix immediately before any deployment"
 if [ -f semgrep-results.json ]; then

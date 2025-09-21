@@ -23,13 +23,13 @@ echo "Medium findings: $TOTAL_MEDIUM (threshold: $MEDIUM_THRESHOLD)"
 
 if [ "$TOTAL_CRITICAL" -gt "$CRITICAL_THRESHOLD" ]; then
     echo "BUILD FAILED: Critical vulnerabilities exceed threshold"
-    echo "🚨 SECURITY GATE FAILED - CRITICAL THRESHOLD EXCEEDED"
+    echo "[FAILED] SECURITY GATE FAILED - CRITICAL THRESHOLD EXCEEDED"
     exit 1
 elif [ "$TOTAL_MEDIUM" -gt "$MEDIUM_THRESHOLD" ]; then
     echo "BUILD FAILED: Medium vulnerabilities exceed threshold"  
-    echo "⚠️ SECURITY GATE FAILED - MEDIUM THRESHOLD EXCEEDED"
+    echo "[FAILED] SECURITY GATE FAILED - MEDIUM THRESHOLD EXCEEDED"
     exit 1
 else
     echo "BUILD PASSED: All findings within acceptable thresholds"
-    echo "✅ SECURITY GATE PASSED - THRESHOLD POLICY"
+    echo "[PASSED] SECURITY GATE PASSED - THRESHOLD POLICY"
 fi

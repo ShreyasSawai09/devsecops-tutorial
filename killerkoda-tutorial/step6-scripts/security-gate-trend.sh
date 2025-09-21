@@ -23,14 +23,14 @@ echo "Total previous vulnerabilities: $TOTAL_PREVIOUS"
 
 if [ "$TOTAL_CURRENT" -gt "$TOTAL_PREVIOUS" ]; then
     echo "BUILD FAILED: Security posture degraded ($TOTAL_CURRENT vs $TOTAL_PREVIOUS)"
-    echo "🚨 SECURITY GATE FAILED - SECURITY REGRESSION DETECTED"
+    echo "[FAILED] SECURITY GATE FAILED - SECURITY REGRESSION DETECTED"
     echo "New vulnerabilities introduced - please review"
     exit 1
 else
     IMPROVEMENT=$((TOTAL_PREVIOUS - TOTAL_CURRENT))
     echo "BUILD PASSED: Security posture maintained or improved"
-    echo "✅ SECURITY GATE PASSED - TREND ANALYSIS"
+    echo "[PASSED] SECURITY GATE PASSED - TREND ANALYSIS"
     if [ "$IMPROVEMENT" -gt 0 ]; then
-        echo "🎉 Security improvement: $IMPROVEMENT fewer vulnerabilities than previous scan"
+        echo "[IMPROVED] Security improvement: $IMPROVEMENT fewer vulnerabilities than previous scan"
     fi
 fi
