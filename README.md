@@ -145,4 +145,4 @@ Educational use only - not for production deployment.
 - Anica Krüger (anicak@kth.se)
 - Shreyas Sawai (sawai@kth.se)
 
-Course: DevOps (DD2482) - KTH Royal Institute of Technology
+Course: Automated Software Testing & DevOps (DD2482) - KTH Royal Institute of Technology
