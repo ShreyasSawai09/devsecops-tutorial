@@ -1,82 +1,109 @@
 rules:
-  - id: sql-injection-format-string
-    patterns:
-      - pattern: |
-          $CURSOR.execute($QUERY)
-      - metavariable-regex:
-          metavariable: $QUERY
-          regex: '.*[fF].*\{.*\}.*'
-    message: |
-      Potential SQL injection vulnerability detected. Using f-strings or .format() 
-      to construct SQL queries can lead to SQL injection attacks.
-    languages: [python]
-    severity: ERROR
-    
   - id: sql-injection-string-concat
     patterns:
       - pattern-either:
-          - pattern: |
-              $CURSOR.execute(... + $VAR + ...)
-          - pattern: |
-              $CURSOR.execute($STR % $VAR)
+          - pattern: $CURSOR.execute(... + $VAR + ...)
+          - pattern: $CURSOR.execute($STR % $VAR)
+          - pattern: $CURSOR.execute(f"...{$VAR}...")
     message: |
-      SQL injection vulnerability: String concatenation used in SQL query construction.
-      Use parameterized queries instead.
+      SQL injection vulnerability: String concatenation/formatting used in SQL query construction.
+      Use parameterized queries instead: cursor.execute("SELECT * FROM table WHERE col = ?", (value,))
     languages: [python]
     severity: ERROR
-
-  - id: hardcoded-secret-key
-    patterns:
-      - pattern: |
-          app.secret_key = $SECRET
-      - metavariable-regex:
-          metavariable: $SECRET
-          regex: '^"[^"]*"$'
-    message: |
-      Hardcoded secret key detected. Secret keys should be stored in environment 
-      variables or secure configuration files.
-    languages: [python]
-    severity: WARNING
 
   - id: command-injection-subprocess
     patterns:
       - pattern-either:
           - pattern: subprocess.run($CMD, shell=True, ...)
           - pattern: subprocess.call($CMD, shell=True, ...)
-          - pattern: os.system($CMD)
+          - pattern: subprocess.Popen($CMD, shell=True, ...)
     message: |
-      Command injection vulnerability: User input may be executed as system commands.
-      This can lead to remote code execution.
+      Command injection vulnerability: subprocess called with shell=True and user input.
+      This allows arbitrary command execution. Use shell=False or allowlist commands.
     languages: [python]
     severity: ERROR
 
-  - id: flask-debug-enabled
+  - id: hardcoded-secret-key
     patterns:
-      - pattern: |
-          app.run(..., debug=True, ...)
+      - pattern-either:
+          - pattern: $APP.secret_key = "..."
+          - pattern: SECRET_KEY = "..."
+          - pattern: secret_key = "..."
     message: |
-      Flask debug mode enabled. This should never be used in production as it
-      exposes sensitive information and allows code execution.
+      Hardcoded secret key detected. Secret keys should be stored in environment variables
+      or secure configuration management systems, not hardcoded in source code.
     languages: [python]
-    severity: WARNING
+    severity: ERROR
 
   - id: insecure-pickle-loads
     patterns:
       - pattern: pickle.loads($DATA)
     message: |
-      Insecure deserialization with pickle.loads(). This can lead to remote code
-      execution if untrusted data is deserialized.
+      Insecure deserialization with pickle.loads(). This can lead to remote code execution
+      if untrusted data is deserialized. Use JSON or implement proper input validation.
     languages: [python]
     severity: ERROR
 
-  - id: open-redirect
+  - id: flask-debug-enabled
     patterns:
-      - pattern: |
-          redirect($URL)
-      - pattern-not: |
-          redirect(url_for(...))
+      - pattern-either:
+          - pattern: $APP.run(debug=True, ...)
+          - pattern: $APP.run(..., debug=True, ...)
     message: |
-      Potential open redirect vulnerability. Redirecting to user-controlled URLs
-      can be used for phishing attacks.
+      Flask debug mode enabled. Debug mode should never be enabled in production as it
+      exposes sensitive information and allows code execution via the debugger.
     languages: [python]
     severity: WARNING
+
+  - id: open-redirect
+    patterns:
+      - pattern-either:
+          - pattern: redirect($URL)
+          - pattern: return redirect($URL)
+    message: |
+      Potential open redirect vulnerability. Validate and allowlist redirect URLs
+      to prevent phishing attacks.
+    languages: [python]
+    severity: WARNING
+
+  - id: missing-authentication-check
+    patterns:
+      - pattern: |
+          @app.route($PATH, methods=[..., "POST", ...])
+          def $FUNC(...):
+            ...
+      - pattern-not: |
+          @app.route($PATH, methods=[..., "POST", ...])
+          def $FUNC(...):
+            ...
+            if 'user_id' not in session:
+              ...
+    message: |
+      POST endpoint without authentication check. Ensure sensitive endpoints
+      verify user authentication before processing requests.
+    languages: [python]
+    severity: WARNING
+
+  - id: path-traversal-vulnerability
+    patterns:
+      - pattern-either:
+          - pattern: open(f".../{$VAR}", ...)
+          - pattern: open(".../" + $VAR, ...)
+          - pattern: open($PATH + $VAR, ...)
+    message: |
+      Path traversal vulnerability detected. User input is used to construct file paths
+      without proper validation. This can allow access to files outside intended directory.
+    languages: [python]
+    severity: ERROR
+
+  - id: command-injection-f-string
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.run(f"...{$VAR}...", shell=True, ...)
+          - pattern: subprocess.call(f"...{$VAR}...", shell=True, ...)
+          - pattern: subprocess.Popen(f"...{$VAR}...", shell=True, ...)
+    message: |
+      Command injection via f-string formatting. User input in f-strings used with
+      subprocess and shell=True allows arbitrary command execution.
+    languages: [python]
+    severity: ERROR

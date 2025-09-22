@@ -194,6 +194,37 @@ def redirect_url():
     target = request.args.get('url', '/')
     return redirect(target)
 
+@app.route('/admin/backup', methods=['POST'])
+def create_backup():
+    # Vulnerability: Additional command injection endpoint
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    backup_name = request.json.get('name', 'backup')
+    # Dangerous: Another command injection vulnerability
+    cmd = f"tar -czf /tmp/{backup_name}.tar.gz /app/data"
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    
+    return jsonify({
+        'status': 'backup created',
+        'output': result.stdout
+    })
+
+@app.route('/admin/logs')
+def view_logs():
+    # Vulnerability: Path traversal
+    if 'role' not in session or session['role'] != 'admin':
+        return redirect(url_for('login'))
+    
+    log_file = request.args.get('file', 'app.log')
+    # Dangerous: Path traversal vulnerability
+    try:
+        with open(f'/var/log/{log_file}', 'r') as f:
+            content = f.read()
+        return f"<pre>{content}</pre>"
+    except:
+        return "Log file not found"
+
 @app.route('/logout')
 def logout():
     session.clear()

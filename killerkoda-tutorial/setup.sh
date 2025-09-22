@@ -61,7 +61,7 @@ mkdir -p /root/devsecops-workspace
 cd /root/devsecops-workspace
 
 # Pre-clone the tutorial repository to speed up the tutorial
-echo "📂 Pre-loading tutorial repository..."
+echo "[SETUP] Pre-loading tutorial repository..."
 git clone --quiet https://github.com/anica279p/devsecops-pipeline-tutorial.git 2>/dev/null || echo "Repository will be cloned during tutorial"
 
 # Set up bash aliases for convenience
@@ -81,7 +81,7 @@ function scan-all() {
     if [ -f Dockerfile ]; then
         docker build -t vulnshop:latest . && grype vulnshop:latest --output json > grype-results.json 2>/dev/null || true
     fi
-    echo "✅ All scans completed! Check the generated JSON files for results."
+    echo "[SUCCESS] All scans completed! Check the generated JSON files for results."
 }
 
 function show-vulns() {
@@ -98,16 +98,16 @@ EOF
 
 # Create a welcome message
 cat > /root/welcome.md << 'EOF'
-# 🎯 DevSecOps Tutorial Environment Ready!
+# DevSecOps Tutorial Environment Ready!
 
 Your environment includes:
-- ✅ Python 3 with pip
-- ✅ Docker and container tools  
-- ✅ Semgrep (SAST scanning)
-- ✅ OWASP Dependency Check
-- ✅ Grype (container scanning)
-- ✅ GitHub CLI
-- ✅ Essential utilities (jq, curl, git)
+- [READY] Python 3 with pip
+- [READY] Docker and container tools  
+- [READY] Semgrep (SAST scanning)
+- [READY] OWASP Dependency Check
+- [READY] Grype (container scanning)
+- [READY] GitHub CLI
+- [READY] Essential utilities (jq, curl, git)
 
 ## Quick Commands:
 - `semgrep-scan <directory>` - Run SAST scan
@@ -116,11 +116,11 @@ Your environment includes:
 - `scan-all` - Run all three scans
 - `show-vulns` - Display found vulnerabilities
 
-Start the tutorial with Step 1! 🚀
+Start the tutorial with Step 1!
 EOF
 
 # Verify installations
-echo "🔍 Verifying tool installations..."
+echo "[VERIFY] Verifying tool installations..."
 python3 --version
 semgrep --version
 dependency-check --version 2>/dev/null | head -1 || echo "Dependency Check: OK"

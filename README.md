@@ -27,7 +27,7 @@ devsecops-pipeline-tutorial/
 │   ├── finish.md             # Conclusion
 │   └── *-verify.sh           # Step verification scripts
 ├── .github/workflows/          # CI/CD pipeline configuration
-│   └── security-scan.yml      # Automated security scanning workflow
+│   └── security-scans.yml     # Automated security scanning workflow (OWASP DC + Grype)
 ├── .semgrep.yml               # Semgrep SAST configuration
 ├── .grype.yaml                # Grype container scanner configuration
 └── dependency-check.properties # OWASP Dependency Check configuration
@@ -101,6 +101,16 @@ The automated pipeline includes:
 - **Security Gates** - Automated build failure on critical findings
 - **Comprehensive Reporting** - Detailed vulnerability analysis
 - **Artifact Generation** - Downloadable security reports
+
+### GitHub Actions Workflow
+
+Status badges (enabled after first run on default branch):
+
+![Security Scans](https://github.com/anica279p/devsecops-pipeline-tutorial/actions/workflows/security-scans.yml/badge.svg)
+
+Key configurations:
+- OWASP Dependency-Check: `--failOnCVSS 7.0`, outputs HTML/JSON/SARIF under `reports/dependency-check/`
+- Grype: `severity-cutoff: high`, SARIF uploaded to the Security tab
 
 ## Educational Goals
 

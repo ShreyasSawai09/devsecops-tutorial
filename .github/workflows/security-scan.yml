@@ -1,10 +1,16 @@
-name: DevSecOps Security Pipeline
+name: DevSecOps Security Scanning Pipeline
 
 on:
   push:
-    branches: [ main, Main, develop ]
+    branches: [ main, develop, latest ]
   pull_request:
-    branches: [ main, Main ]
+    branches: [ main, latest ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
 
 jobs:
   security-scan:
@@ -12,174 +18,131 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout Repository
       uses: actions/checkout@v4
-
+      
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-    
-    - name: Install dependencies
+        
+    - name: Install Dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r vulnerable-app/requirements.txt
-        pip install semgrep
-
+        
     # SAST - Static Application Security Testing
-    - name: Run Semgrep SAST Scan
-      id: semgrep
+    - name: Install Semgrep
       run: |
-        semgrep --config=.semgrep.yml --json --output=semgrep-report.json vulnerable-app/ || true
-        semgrep --config=auto --json --output=semgrep-auto-report.json vulnerable-app/ || true
-      continue-on-error: true
-
-    # Dependency Scanning
-    - name: Run OWASP Dependency Check
-      uses: dependency-check/Dependency-Check_Action@main
-      id: depcheck
+        python -m pip install semgrep
+        
+    - name: Run Semgrep SAST Scan
+      run: |
+        semgrep --config=.semgrep.yml --json --output=semgrep-results.json vulnerable-app/
+        semgrep --config=.semgrep.yml --sarif --output=semgrep-results.sarif vulnerable-app/
+        
+    - name: Upload Semgrep Results to GitHub Security Tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
       with:
-        project: 'VulnShop'
-        path: './vulnerable-app'
-        format: 'JSON'
-        out: 'dependency-check-report'
-        args: >
-          --enableRetired
-          --enableExperimental
-          --failOnCVSS 7
-      continue-on-error: true
-
-    # Container Scanning  
+        sarif_file: semgrep-results.sarif
+        
+    # Dependency Vulnerability Scanning
+    - name: Install OWASP Dependency Check
+      run: |
+        mkdir -p reports/dependency-check
+        wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
+        unzip dependency-check-8.4.0-release.zip
+        chmod +x dependency-check/bin/dependency-check.sh
+        
+    - name: Run OWASP Dependency Check
+      run: |
+        ./dependency-check/bin/dependency-check.sh \
+          --project "VulnShop" \
+          --scan vulnerable-app/ \
+          --format "HTML,JSON,SARIF" \
+          --out reports/dependency-check \
+          --failOnCVSS 7.0
+          
+    - name: Upload Dependency Check Results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: reports/dependency-check/dependency-check-report.sarif
+        
+    # Container Security Scanning
     - name: Build Docker Image
       run: |
-        docker build -t vulnshop:${{ github.sha }} ./vulnerable-app/
-
-    - name: Run Grype Container Scan
-      id: grype
+        cd vulnerable-app
+        docker build -t vulnshop:latest .
+        
+    - name: Install Grype
       run: |
-        # Install Grype
         curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-        # Run container scan and ensure output file is created
-        grype vulnshop:${{ github.sha }} --output json --file grype-report.json || echo "[]" > grype-report.json
-        # Verify file was created
-        ls -la grype-report.json
-      continue-on-error: true
-
-    # Security Report Generation
-    - name: Generate Security Report
+        
+    - name: Run Grype Container Scan
       run: |
-        echo "# DevSecOps Security Scan Results" > security-report.md
-        echo "**Scan Date:** $(date)" >> security-report.md
-        echo "**Commit:** ${{ github.sha }}" >> security-report.md
-        echo "" >> security-report.md
+        grype vulnshop:latest --output json --file grype-results.json
+        grype vulnshop:latest --output sarif --file grype-results.sarif
         
-        # Semgrep Results
-        echo "## SAST (Semgrep) Results" >> security-report.md
-        if [ -f semgrep-report.json ]; then
-          SEMGREP_FINDINGS=$(jq '.results | length' semgrep-report.json)
-          echo "- **Findings:** $SEMGREP_FINDINGS" >> security-report.md
-          if [ "$SEMGREP_FINDINGS" -gt 0 ]; then
-            echo "- **Critical Issues:** $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-report.json)" >> security-report.md
-          fi
-        else
-          echo "- Semgrep scan completed" >> security-report.md
-        fi
-        echo "" >> security-report.md
+    - name: Upload Grype Results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always() && hashFiles('grype-results.sarif') != ''
+      with:
+        sarif_file: grype-results.sarif
         
-        # Dependency Check Results
-        echo "## Dependency Vulnerability Scan Results" >> security-report.md
-        if [ -f dependency-check-report/dependency-check-report.json ]; then
-          echo "- Dependency scan completed - see attached report" >> security-report.md
-        else
-          echo "- Dependency scan completed" >> security-report.md
-        fi
-        echo "" >> security-report.md
-        
-        # Grype Results
-        echo "## Container Scan (Grype) Results" >> security-report.md
-        if [ -f grype-report.json ]; then
-          GRYPE_VULNS=$(jq '.matches | length' grype-report.json 2>/dev/null || echo "0")
-          echo "- **Container Vulnerabilities:** $GRYPE_VULNS" >> security-report.md
-        else
-          echo "- Container scan completed with no report generated" >> security-report.md
-        fi
-        
-        echo "" >> security-report.md
-        echo "## Summary" >> security-report.md
-        echo "This automated security scan detected multiple intentional vulnerabilities" >> security-report.md
-        echo "in the VulnShop application, demonstrating the effectiveness of DevSecOps" >> security-report.md
-        echo "security scanning in CI/CD pipelines." >> security-report.md
-
-    # Upload all reports as artifacts
-    - name: Upload Semgrep Report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: semgrep-reports
-        path: |
-          semgrep-report.json
-          semgrep-auto-report.json
-
-    - name: Upload Dependency Check Report  
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: dependency-check-report
-        path: dependency-check-report/
-
-    - name: Upload Grype Report
-      uses: actions/upload-artifact@v4
-      if: always() 
-      with:
-        name: grype-report
-        path: grype-report.json
-
-    - name: Upload Security Summary
-      uses: actions/upload-artifact@v4  
-      if: always()
-      with:
-        name: security-report
-        path: security-report.md
-
-    # Security Gates - This would normally fail the build
-    # For demo purposes, we'll just report the findings
+    # Security Gate Evaluation
     - name: Evaluate Security Gates
       run: |
-        echo "=== DevSecOps Security Gate Evaluation ==="
+        echo "=== SECURITY GATE EVALUATION ==="
         
-        TOTAL_ISSUES=0
+        # Count critical SAST findings
+        SAST_CRITICAL=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json)
+        echo "SAST Critical Findings: $SAST_CRITICAL"
         
-        # Check Semgrep findings
-        if [ -f semgrep-report.json ]; then
-          SEMGREP_CRITICAL=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-report.json 2>/dev/null || echo "0")
-          SEMGREP_TOTAL=$(jq '.results | length' semgrep-report.json 2>/dev/null || echo "0")
-          echo "Semgrep SAST: $SEMGREP_TOTAL findings ($SEMGREP_CRITICAL critical)"
-          TOTAL_ISSUES=$((TOTAL_ISSUES + SEMGREP_CRITICAL))
+        # Count high/critical dependency vulnerabilities
+        DEP_HIGH=0
+        if [ -f "reports/dependency-check/dependency-check-report.json" ]; then
+          DEP_HIGH=$(jq '[.dependencies[]?.vulnerabilities[]? | select(.severity=="HIGH" or .severity=="CRITICAL")] | length' reports/dependency-check/dependency-check-report.json 2>/dev/null || echo "0")
         fi
+        echo "Dependency High/Critical Findings: $DEP_HIGH"
         
-        # Check container vulnerabilities - handle different JSON structures
-        if [ -f grype-report.json ]; then
-          # Check if it's an array or object structure
-          if jq -e 'type == "object" and has("matches")' grype-report.json >/dev/null 2>&1; then
-            GRYPE_CRITICAL=$(jq '[.matches[]? | select(.vulnerability.severity=="Critical")] | length' grype-report.json 2>/dev/null || echo "0")
-            GRYPE_TOTAL=$(jq '.matches | length' grype-report.json 2>/dev/null || echo "0")
-          elif jq -e 'type == "array"' grype-report.json >/dev/null 2>&1; then
-            GRYPE_CRITICAL=0
-            GRYPE_TOTAL=$(jq '. | length' grype-report.json 2>/dev/null || echo "0")
-          else
-            GRYPE_CRITICAL=0
-            GRYPE_TOTAL=0
-          fi
-          echo "Container Scan: $GRYPE_TOTAL vulnerabilities ($GRYPE_CRITICAL critical)"
-          TOTAL_ISSUES=$((TOTAL_ISSUES + GRYPE_CRITICAL))
+        # Count high/critical container vulnerabilities  
+        CONTAINER_HIGH=0
+        if [ -f "grype-results.json" ]; then
+          CONTAINER_HIGH=$(jq '[.matches[] | select(.vulnerability.severity=="High" or .vulnerability.severity=="Critical")] | length' grype-results.json 2>/dev/null || echo "0")
         fi
+        echo "Container High/Critical Findings: $CONTAINER_HIGH"
         
-        echo ""
-        echo "Total Critical Issues: $TOTAL_ISSUES"
+        TOTAL_CRITICAL=$((SAST_CRITICAL + DEP_HIGH + CONTAINER_HIGH))
+        echo "Total Critical/High Findings: $TOTAL_CRITICAL"
         
-        if [ "$TOTAL_ISSUES" -gt 0 ]; then
-          echo "⚠️  SECURITY GATE: $TOTAL_ISSUES critical vulnerabilities detected"
-          echo "   In a production environment, this would fail the build"
-          echo "   For this tutorial demo, we're allowing the pipeline to continue"
+        if [ "$TOTAL_CRITICAL" -gt 0 ]; then
+          echo "🚨 SECURITY GATE FAILED: $TOTAL_CRITICAL critical/high vulnerabilities found"
+          echo "Please fix vulnerabilities before deployment"
+          exit 1
         else
-          echo "✅ SECURITY GATE: No critical vulnerabilities detected"
+          echo "✅ SECURITY GATE PASSED: No critical vulnerabilities detected"
         fi
+        
+    - name: Upload Security Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          semgrep-results.json
+          semgrep-results.sarif
+          reports/dependency-check/
+          grype-results.json
+          grype-results.sarif
+          
+    - name: Security Notification
+      if: failure()
+      run: |
+        echo "🚨 SECURITY ALERT 🚨"
+        echo "Repository: ${{ github.repository }}"
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Critical vulnerabilities detected - deployment blocked"
+        # In production, send to Slack/email/ticketing system
