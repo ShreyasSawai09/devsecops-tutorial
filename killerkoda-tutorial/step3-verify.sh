@@ -49,4 +49,17 @@ fi
 echo "[SUCCESS] Step 3 Complete: SAST scanning with Semgrep successful"
 echo "[SUCCESS] Found $VULN_COUNT total vulnerabilities ($CRITICAL_COUNT critical)"
 echo "[SUCCESS] Custom Semgrep rules working correctly"
+=======
+    echo "Semgrep configuration file missing. Ensure .semgrep.yml exists in project root."
+    exit 1
+fi
+
+# Check if scans were performed (using the actual file names from tutorial)
+if [ ! -f "semgrep-combined-results.json" ]; then
+    echo "Semgrep scan not performed. Follow Step 3 tutorial to run Semgrep scans."
+    exit 1
+fi
+
+echo "Step 3 Complete: SAST scanning with Semgrep successful"
+echo "Custom Semgrep rules working correctly"
 echo "Ready to proceed to dependency vulnerability scanning!"

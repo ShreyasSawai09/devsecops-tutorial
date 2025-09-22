@@ -24,4 +24,11 @@ fi
 
 echo "[SUCCESS] Step 1 Complete: Environment verified and ready"
 echo "[SUCCESS] Python 3, Git, and Docker are available"
+=======
+    echo "Docker not found"
+    exit 1
+fi
+
+echo "Step 1 Complete: Environment verified and ready"
+echo "Python 3, Git, and Docker are available"
 echo "Ready to proceed to exploring the vulnerable application!"

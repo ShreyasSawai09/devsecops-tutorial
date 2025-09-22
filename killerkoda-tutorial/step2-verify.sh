@@ -29,6 +29,7 @@ if [ ! -f "/tmp/examined_source" ]; then
     touch /tmp/examined_source
 fi
 
+
 echo "[SUCCESS] Step 2 Complete: Vulnerable application environment ready"
 echo "[SUCCESS] Source code examined and vulnerabilities identified"
 echo "Ready to proceed to SAST scanning with Semgrep!"

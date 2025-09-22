@@ -32,7 +32,9 @@ pip3 install --upgrade pip setuptools wheel
 
 # Pre-install security scanning tools
 echo "📦 Installing Semgrep..."
-pip3 install semgrep
+pip3 install --user semgrep --break-system-packages
+export PATH="/root/.local/bin:$PATH"
+echo 'export PATH="/root/.local/bin:$PATH"' >> /root/.bashrc
 
 echo "🔍 Installing OWASP Dependency Check..."
 # Download and install OWASP Dependency Check
