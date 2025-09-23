@@ -9,34 +9,34 @@ Now that you've learned to use all three security scanning tools individually, i
 Our complete security pipeline follows this flow:
 
 ```
-┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Code      │    │    Trigger       │    │   Checkout      │
-│   Commit    ├────▶   CI/CD          ├────▶   Source Code   │
-│             │    │   Pipeline       │    │                 │  
-└─────────────┘    └──────────────────┘    └─────────┬───────┘
-                                                     │
-                                                     ▼
-               ┌─────────────────────────────────────────────────┐
-               │           SECURITY SCANNING PHASE               │
-               │                                                 │
-         ┌─────▼─────┐    ┌─────────▼─────────┐    ┌─────▼─────┐
-         │   SAST    │    │   Dependency      │    │ Container │
-         │ (Semgrep) │    │ Scan (OWASP DC)   │    │  (Grype)  │
-         └─────┬─────┘    └─────────┬─────────┘    └─────┬─────┘
-               │                    │                    │
-               ▼                    ▼                    ▼
-         ┌─────────────────────────────────────────────────────┐
-         │              SECURITY GATE EVALUATION               │
-         │                                                     │
-         │  Critical vulnerabilities found?                    │
-         │                                                     │
-         │  ┌─────────┐              ┌─────────────┐           │
-         │  │   YES   │              │     NO      │           │
-         │  │         ▼              │             ▼           │
-         │  │  ❌ FAIL BUILD         │  ✅ CONTINUE             │
-         │  │  📧 NOTIFY TEAM        │  🚀 DEPLOY               │
-         │  │  📊 GENERATE REPORT    │  📊 GENERATE REPORT     │
-         └─────────────────────────────────────────────────────┘
++-------------+    +------------------+    +-----------------+
+|   Code      |    |    Trigger       |    |   Checkout      |
+|   Commit    |--->|   CI/CD          |--->|   Source Code   |
+|             |    |   Pipeline       |    |                 |  
++-------------+    +------------------+    +---------+-------+
+                                                     |
+                                                     v
+               +---------------------------------------------+
+               |           SECURITY SCANNING PHASE           |
+               |                                             |
+         +-----v-----+    +---------v---------+    +-----v-----+
+         |   SAST    |    |   Dependency      |    | Container |
+         | (Semgrep) |    | Scan (OWASP DC)   |    |  (Grype)  |
+         +-----+-----+    +---------+---------+    +-----+-----+
+               |                    |                    |
+               v                    v                    v
+         +---------------------------------------------+
+         |              SECURITY GATE EVALUATION       |
+         |                                             |
+         |  Critical vulnerabilities found?            |
+         |                                             |
+         |  +---------+              +-------------+   |
+         |  |   YES   |              |     NO      |   |
+         |  |         v              |             v   |
+         |  | [FAIL] BUILD           | [PASS] CONTINUE |
+         |  | [NOTIFY] TEAM          | [DEPLOY]        |
+         |  | [REPORT] GENERATE      | [REPORT] GEN    |
+         +---------------------------------------------+
 ```
 
 ## Examining the GitHub Actions Workflow
@@ -246,7 +246,7 @@ CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' $
 
 if [ "$CRITICAL_COUNT" -gt 0 ]; then
     # In a real pipeline, send to Slack, email, or ticketing system
-    echo "🚨 SECURITY ALERT 🚨"
+    echo "[SECURITY ALERT]"
     echo "Pipeline: DevSecOps Tutorial"
     echo "Repository: devsecops-pipeline-tutorial"
     echo "Critical Vulnerabilities: $CRITICAL_COUNT"
@@ -262,7 +262,7 @@ chmod +x notification-example.sh
 ./notification-example.sh
 ```{{exec}}
 
-## Easter Egg Clue #3 🔍
+## Easter Egg Clue #3
 
 The CI/CD pipeline configuration reveals something interesting. Look at the environment variables and secrets configuration. There's a special endpoint mentioned in the workflow comments that becomes accessible when certain conditions are met. The combination of the hardcoded secret key (from SAST), the vulnerable pickle deserialization (from SAST), and the admin authentication bypass might unlock something special...
 
@@ -279,9 +279,9 @@ echo "=== DEVSECOPS SECURITY METRICS ==="
 echo "Date: $(date)"
 echo ""
 echo "SCAN COVERAGE:"
-echo "- SAST Enabled: ✅"
-echo "- Dependency Scan Enabled: ✅" 
-echo "- Container Scan Enabled: ✅"
+echo "- SAST Enabled: [YES]"
+echo "- Dependency Scan Enabled: [YES]" 
+echo "- Container Scan Enabled: [YES]"
 echo ""
 echo "CURRENT SECURITY POSTURE:"
 echo "- Total Vulnerabilities: $(jq '.results | length' semgrep-results.json 2>/dev/null || echo "N/A")"

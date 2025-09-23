@@ -12,92 +12,92 @@ Let's create a unified security dashboard that combines results from all three s
 cat > security-dashboard.sh << 'EOF'
 #!/bin/bash
 
-echo "╔═══════════════════════════════════════════════════════════════════════════════╗"
-echo "║                          DEVSECOPS SECURITY DASHBOARD                        ║"
-echo "╠═══════════════════════════════════════════════════════════════════════════════╣"
-echo "║  Application: VulnShop                                                        ║"
-echo "║  Scan Date: $(date)                                ║"
-echo "║  Pipeline: Automated DevSecOps Security Scanning                             ║"
-echo "╚═══════════════════════════════════════════════════════════════════════════════╝"
+echo "================================================================================"
+echo "                          DEVSECOPS SECURITY DASHBOARD                        "
+echo "================================================================================"
+echo "  Application: VulnShop                                                        "
+echo "  Scan Date: $(date)                                "
+echo "  Pipeline: Automated DevSecOps Security Scanning                             "
+echo "================================================================================"
 echo ""
 
 # SAST Results
 echo "[SAST] STATIC APPLICATION SECURITY TESTING (SAST) - Semgrep"
-echo "════════════════════════════════════════════════════════════════"
+echo "================================================================"
 if [ -f semgrep-results.json ]; then
     TOTAL_SAST=$(jq '.results | length' semgrep-results.json)
     CRITICAL_SAST=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json)
     WARNING_SAST=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-results.json)
     
-    echo "Status: 🔴 ISSUES FOUND"
+    echo "Status: [ISSUES FOUND]"
     echo "Total Findings: $TOTAL_SAST"
-    echo "├── Critical (ERROR): $CRITICAL_SAST"
-    echo "└── Warning: $WARNING_SAST"
+    echo "- Critical (ERROR): $CRITICAL_SAST"
+    echo "- Warning: $WARNING_SAST"
     echo ""
     echo "Top Critical Issues:"
-    jq -r '.results[] | select(.extra.severity=="ERROR") | "  • \(.check_id) (\(.path):\(.start.line))"' semgrep-results.json | head -5
+    jq -r '.results[] | select(.extra.severity=="ERROR") | "  - \(.check_id) (\(.path):\(.start.line))"' semgrep-results.json | head -5
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status: [NOT SCANNED]"
 fi
 echo ""
 
 # Dependency Scan Results  
-echo "📦 DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
-echo "════════════════════════════════════════════════════════════════"
+echo "[DEPENDENCY] DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
+echo "================================================================"
 if [ -f dep-check-reports/dependency-check-report.json ]; then
-    echo "Status: 🔴 VULNERABILITIES FOUND"
+    echo "Status: [VULNERABILITIES FOUND]"
     echo "Vulnerable Dependencies: $(jq '[.dependencies[] | select(.vulnerabilities)] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "N/A")"
-    echo "├── High Severity: TBD"
-    echo "└── Medium Severity: TBD"
+    echo "- High Severity: TBD"
+    echo "- Medium Severity: TBD"
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status: [NOT SCANNED]"
     echo "Note: Dependency scan results would show vulnerable packages"
     echo "Expected findings: urllib3, setuptools, requests"
 fi
 echo ""
 
 # Container Scan Results
-echo "🐳 CONTAINER IMAGE SCANNING - Grype"  
-echo "════════════════════════════════════════════════════════════════"
+echo "[CONTAINER] CONTAINER IMAGE SCANNING - Grype"  
+echo "================================================================"
 if [ -f grype-results.json ]; then
     CONTAINER_VULNS=$(jq '.matches | length' grype-results.json 2>/dev/null || echo "0")
-    echo "Status: 🔴 VULNERABILITIES FOUND"
+    echo "Status: [VULNERABILITIES FOUND]"
     echo "Container Vulnerabilities: $CONTAINER_VULNS"
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status: [NOT SCANNED]"
     echo "Note: Container scan would show base image and package vulnerabilities"
 fi
 echo ""
 
 # Security Gate Status
-echo "🚦 SECURITY GATE EVALUATION"
-echo "════════════════════════════════════════════════════════════════"
+echo "[SECURITY GATE] SECURITY GATE EVALUATION"
+echo "================================================================"
 if [ "$CRITICAL_SAST" -gt 0 ] 2>/dev/null; then
-    echo "Overall Status: ❌ FAILED"
+    echo "Overall Status: [FAILED]"
     echo "Reason: Critical vulnerabilities detected in source code"
     echo "Action Required: Fix critical SAST findings before deployment"
-    echo "Deployment: 🚫 BLOCKED"
+    echo "Deployment: [BLOCKED]"
 else
-    echo "Overall Status: ✅ PASSED"  
-    echo "Deployment: 🚀 APPROVED"
+    echo "Overall Status: [PASSED]"  
+    echo "Deployment: [APPROVED]"
 fi
 echo ""
 
 # Remediation Priority
-echo "🎯 REMEDIATION PRIORITY MATRIX"
-echo "════════════════════════════════════════════════════════════════"
+echo "[REMEDIATION] REMEDIATION PRIORITY MATRIX"
+echo "================================================================"
 echo "Priority 1 (Critical): Fix immediately before any deployment"
 if [ -f semgrep-results.json ]; then
-    jq -r '.results[] | select(.extra.severity=="ERROR") | "  • \(.check_id): \(.extra.message | split(".")[0])"' semgrep-results.json
+    jq -r '.results[] | select(.extra.severity=="ERROR") | "  - \(.check_id): \(.extra.message | split(".")[0])"' semgrep-results.json
 fi
 echo ""
 echo "Priority 2 (High): Fix within 1 week"
-echo "  • Vulnerable dependencies (OWASP Dependency Check findings)"
-echo "  • Container base image vulnerabilities"
+echo "  - Vulnerable dependencies (OWASP Dependency Check findings)"
+echo "  - Container base image vulnerabilities"
 echo ""
 echo "Priority 3 (Medium): Fix within 1 month"  
 if [ -f semgrep-results.json ]; then
-    jq -r '.results[] | select(.extra.severity=="WARNING") | "  • \(.check_id): \(.extra.message | split(".")[0])"' semgrep-results.json
+    jq -r '.results[] | select(.extra.severity=="WARNING") | "  - \(.check_id): \(.extra.message | split(".")[0])"' semgrep-results.json
 fi
 EOF
 
@@ -113,14 +113,14 @@ Create comprehensive reports for each vulnerability type:
 cat > detailed-vulnerability-report.sh << 'EOF'
 #!/bin/bash
 
-echo "═══════════════════════════════════════════════════════════════════"
+echo "==================================================================="
 echo "                    DETAILED VULNERABILITY ANALYSIS"
-echo "═══════════════════════════════════════════════════════════════════"
+echo "==================================================================="
 echo ""
 
 if [ -f semgrep-results.json ]; then
-    echo "🔍 STATIC APPLICATION SECURITY TESTING DETAILED RESULTS"
-    echo "───────────────────────────────────────────────────────────────────"
+    echo "[SAST] STATIC APPLICATION SECURITY TESTING DETAILED RESULTS"
+    echo "-------------------------------------------------------------------"
     
     # Process each vulnerability
     jq -r '.results[] | {
@@ -131,11 +131,11 @@ if [ -f semgrep-results.json ]; then
         message: .extra.message
     } | "
 VULNERABILITY: \(.id)
-├── File: \(.file)
-├── Line: \(.line) 
-├── Severity: \(.severity)
-├── Description: \(.message)
-└── Impact: " + (
+- File: \(.file)
+- Line: \(.line) 
+- Severity: \(.severity)
+- Description: \(.message)
+- Impact: " + (
     if .id == "sql-injection-string-concat" then "High - Data breach, authentication bypass"
     elif .id == "command-injection-subprocess" then "Critical - Remote code execution"
     elif .id == "hardcoded-secret-key" then "Medium - Session hijacking potential"
@@ -161,8 +161,8 @@ Generate specific remediation instructions for developers:
 cat > remediation-guide.sh << 'EOF'
 #!/bin/bash
 
-echo "🛠️  VULNERABILITY REMEDIATION GUIDE"
-echo "════════════════════════════════════════════════════════════════════"
+echo "[REMEDIATION] VULNERABILITY REMEDIATION GUIDE"
+echo "===================================================================="
 echo "This guide provides step-by-step instructions to fix identified vulnerabilities."
 echo ""
 
@@ -171,14 +171,14 @@ if [ -f semgrep-results.json ]; then
     VULN_TYPES=$(jq -r '.results[].check_id' semgrep-results.json | sort -u)
     
     for vuln in $VULN_TYPES; do
-        echo "📋 FIXING: $vuln"
-        echo "────────────────────────────────────────────────────────────────────"
+        echo "[FIXING] $vuln"
+        echo "--------------------------------------------------------------------"
         
         case $vuln in
             "sql-injection-string-concat")
                 echo "ISSUE: SQL injection via string concatenation"
                 echo "FILES AFFECTED:"
-                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  • \(.path):\(.start.line)"' semgrep-results.json
+                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  - \(.path):\(.start.line)"' semgrep-results.json
                 echo ""
                 echo "REMEDIATION:"
                 echo "  1. Replace string concatenation with parameterized queries"
@@ -192,15 +192,15 @@ if [ -f semgrep-results.json ]; then
                 echo "  cursor.execute(\"SELECT * FROM users WHERE username = ?\", (username,))"
                 echo ""
                 echo "TESTING:"
-                echo "  • Verify SQL injection payloads no longer work"
-                echo "  • Test with legitimate usernames containing quotes"
+                echo "  - Verify SQL injection payloads no longer work"
+                echo "  - Test with legitimate usernames containing quotes"
                 echo ""
                 ;;
                 
             "command-injection-subprocess")
                 echo "ISSUE: Command injection in subprocess calls"
                 echo "FILES AFFECTED:"
-                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  • \(.path):\(.start.line)"' semgrep-results.json
+                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  - \(.path):\(.start.line)"' semgrep-results.json
                 echo ""
                 echo "REMEDIATION:"
                 echo "  1. Never use shell=True with user input"
@@ -223,7 +223,7 @@ if [ -f semgrep-results.json ]; then
             "hardcoded-secret-key")
                 echo "ISSUE: Hardcoded secret keys in source code"
                 echo "FILES AFFECTED:"
-                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  • \(.path):\(.start.line)"' semgrep-results.json
+                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  - \(.path):\(.start.line)"' semgrep-results.json
                 echo ""
                 echo "REMEDIATION:"
                 echo "  1. Move secrets to environment variables"
@@ -243,7 +243,7 @@ if [ -f semgrep-results.json ]; then
             "insecure-pickle-loads")
                 echo "ISSUE: Insecure deserialization with pickle.loads()"
                 echo "FILES AFFECTED:"
-                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  • \(.path):\(.start.line)"' semgrep-results.json
+                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  - \(.path):\(.start.line)"' semgrep-results.json
                 echo ""
                 echo "REMEDIATION:"
                 echo "  1. Never deserialize untrusted data with pickle"
@@ -263,7 +263,7 @@ if [ -f semgrep-results.json ]; then
             "flask-debug-enabled")
                 echo "ISSUE: Flask debug mode enabled"
                 echo "FILES AFFECTED:"
-                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  • \(.path):\(.start.line)"' semgrep-results.json
+                jq -r --arg vuln "$vuln" '.results[] | select(.check_id==$vuln) | "  - \(.path):\(.start.line)"' semgrep-results.json
                 echo ""
                 echo "REMEDIATION:"
                 echo "  1. Set debug=False in production"
@@ -279,13 +279,13 @@ if [ -f semgrep-results.json ]; then
                 ;;
         esac
         
-        echo "════════════════════════════════════════════════════════════════════"
+        echo "===================================================================="
         echo ""
     done
 fi
 
 echo "REMEDIATION PRIORITY RECOMMENDATIONS"
-echo "────────────────────────────────────────────────────────────────────"
+echo "--------------------------------------------------------------------"
 echo "1. Fix SQL injection and command injection IMMEDIATELY (RCE risk)"
 echo "2. Replace insecure deserialization (RCE risk)"  
 echo "3. Move hardcoded secrets to environment variables"
@@ -293,12 +293,12 @@ echo "4. Disable debug mode in production"
 echo "5. Implement proper redirect validation"
 echo ""
 echo "PREVENTION STRATEGIES"
-echo "────────────────────────────────────────────────────────────────────"
-echo "• Implement mandatory security code reviews"
-echo "• Add pre-commit hooks with Semgrep scanning"
-echo "• Provide secure coding training for developers"  
-echo "• Establish security champions in each team"
-echo "• Regular security scanning in CI/CD pipelines"
+echo "--------------------------------------------------------------------"
+echo "- Implement mandatory security code reviews"
+echo "- Add pre-commit hooks with Semgrep scanning"
+echo "- Provide secure coding training for developers"  
+echo "- Establish security champions in each team"
+echo "- Regular security scanning in CI/CD pipelines"
 EOF
 
 chmod +x remediation-guide.sh
@@ -314,7 +314,7 @@ cat > executive-summary.sh << 'EOF'
 #!/bin/bash
 
 echo "EXECUTIVE SECURITY SUMMARY"
-echo "════════════════════════════════════════════════════════════════════"
+echo "===================================================================="
 echo "Application: VulnShop E-commerce Platform"
 echo "Assessment Date: $(date)"
 echo "Assessment Type: Automated DevSecOps Security Scanning"
@@ -330,74 +330,74 @@ if [ -f semgrep-results.json ]; then
     RISK_SCORE=$(( CRITICAL * 10 + WARNING * 3 ))
     
     if [ "$RISK_SCORE" -gt 20 ]; then
-        RISK_LEVEL="🔴 HIGH"
+        RISK_LEVEL="[HIGH]"
     elif [ "$RISK_SCORE" -gt 10 ]; then
-        RISK_LEVEL="🟡 MEDIUM" 
+        RISK_LEVEL="[MEDIUM]" 
     else
-        RISK_LEVEL="🟢 LOW"
+        RISK_LEVEL="[LOW]"
     fi
 else
     RISK_SCORE=0
-    RISK_LEVEL="🟢 LOW"
+    RISK_LEVEL="[LOW]"
     TOTAL=0
     CRITICAL=0
     WARNING=0
 fi
 
 echo "RISK ASSESSMENT"
-echo "────────────────────────────────────────────────────────────────────"
+echo "--------------------------------------------------------------------"
 echo "Overall Risk Level: $RISK_LEVEL"
 echo "Risk Score: $RISK_SCORE/100"
 echo "Total Vulnerabilities: $TOTAL"
-echo "├── Critical: $CRITICAL"
-echo "└── Warning: $WARNING"
+echo "- Critical: $CRITICAL"
+echo "- Warning: $WARNING"
 echo ""
 
 echo "SECURITY POSTURE"
-echo "────────────────────────────────────────────────────────────────────"
-echo "DevSecOps Implementation: ✅ ACTIVE"
-echo "├── SAST Scanning: ✅ Implemented (Semgrep)"
-echo "├── Dependency Scanning: ✅ Implemented (OWASP DC)"
-echo "└── Container Scanning: ✅ Implemented (Grype)"
+echo "--------------------------------------------------------------------"
+echo "DevSecOps Implementation: [ACTIVE]"
+echo "- SAST Scanning: [YES] Implemented (Semgrep)"
+echo "- Dependency Scanning: [YES] Implemented (OWASP DC)"
+echo "- Container Scanning: [YES] Implemented (Grype)"
 echo ""
 echo "Security Gate Status: FAILING"
 echo "Deployment Status: BLOCKED"
 echo ""
 
-echo "💼 BUSINESS IMPACT"
-echo "────────────────────────────────────────────────────────────────────"
+echo "[BUSINESS] BUSINESS IMPACT"
+echo "--------------------------------------------------------------------"
 if [ "$CRITICAL" -gt 0 ]; then
-    echo "Immediate Risk: 🔴 HIGH"
-    echo "• Potential for data breach and system compromise"
-    echo "• Risk of regulatory compliance violations"
-    echo "• Possible reputational damage and customer loss"
-    echo "• Estimated cost of breach: \$2M - \$5M"
+    echo "Immediate Risk: [HIGH]"
+    echo "- Potential for data breach and system compromise"
+    echo "- Risk of regulatory compliance violations"
+    echo "- Possible reputational damage and customer loss"
+    echo "- Estimated cost of breach: \$2M - \$5M"
 else
-    echo "Immediate Risk: 🟢 LOW"
-    echo "• No critical vulnerabilities identified"
+    echo "Immediate Risk: [LOW]"
+    echo "- No critical vulnerabilities identified"
 fi
 echo ""
 
 echo "RECOMMENDATIONS"
-echo "────────────────────────────────────────────────────────────────────"
+echo "--------------------------------------------------------------------"
 echo "Immediate Actions (0-7 days):"
-echo "• Fix $CRITICAL critical vulnerabilities before production deployment"
-echo "• Implement emergency security patch process"
-echo "• Conduct incident response readiness assessment"
+echo "- Fix $CRITICAL critical vulnerabilities before production deployment"
+echo "- Implement emergency security patch process"
+echo "- Conduct incident response readiness assessment"
 echo ""
 echo "Short-term Actions (1-4 weeks):"
-echo "• Address $WARNING medium-priority security findings"
-echo "• Enhance developer security training program"
-echo "• Establish security code review process"
+echo "- Address $WARNING medium-priority security findings"
+echo "- Enhance developer security training program"
+echo "- Establish security code review process"
 echo ""
 echo "Long-term Actions (1-3 months):"
-echo "• Implement security metrics and KPI tracking"
-echo "• Establish bug bounty or penetration testing program"  
-echo "• Regular security architecture reviews"
+echo "- Implement security metrics and KPI tracking"
+echo "- Establish bug bounty or penetration testing program"  
+echo "- Regular security architecture reviews"
 echo ""
 
-echo "💰 INVESTMENT REQUIREMENTS"
-echo "────────────────────────────────────────────────────────────────────"
+echo "[INVESTMENT] INVESTMENT REQUIREMENTS"
+echo "--------------------------------------------------------------------"
 echo "DevSecOps Tooling: \$15,000/year (Already implemented)"
 echo "Security Training: \$25,000 (One-time)"
 echo "Additional Security Resources: \$150,000/year"
@@ -426,10 +426,10 @@ echo "When you combine the hardcoded secret with the pickle deserialization"
 echo "vulnerability and admin access, you can achieve remote code execution!"
 echo ""
 echo "Exploitation would involve:"
-echo "• Using the known secret key to forge admin sessions"
-echo "• Crafting malicious pickle payloads for /deserialize endpoint"  
-echo "• Leveraging vulnerable dependencies for persistence"
-echo "• Using container vulnerabilities for privilege escalation"
+echo "- Using the known secret key to forge admin sessions"
+echo "- Crafting malicious pickle payloads for /deserialize endpoint"  
+echo "- Leveraging vulnerable dependencies for persistence"
+echo "- Using container vulnerabilities for privilege escalation"
 echo ""
 echo "This demonstrates why DevSecOps scanning is crucial - individual"
 echo "vulnerabilities become much more dangerous when chained together!"
@@ -447,40 +447,40 @@ cat > security-improvement-plan.sh << 'EOF'
 #!/bin/bash
 
 echo "[IMPROVEMENT] CONTINUOUS SECURITY IMPROVEMENT FRAMEWORK"
-echo "════════════════════════════════════════════════════════════════════"
+echo "===================================================================="
 echo ""
 
 echo "[WEEKLY] WEEKLY SECURITY ACTIVITIES"
-echo "────────────────────────────────────────────────────────────────────"
-echo "• Review and triage new vulnerability findings"
-echo "• Update security scanning tool configurations"
-echo "• Analyze security metrics trends"
-echo "• Conduct team security knowledge sharing"
+echo "--------------------------------------------------------------------"
+echo "- Review and triage new vulnerability findings"
+echo "- Update security scanning tool configurations"
+echo "- Analyze security metrics trends"
+echo "- Conduct team security knowledge sharing"
 echo ""
 
-echo "📅 MONTHLY SECURITY ACTIVITIES"  
-echo "────────────────────────────────────────────────────────────────────"
-echo "• Security scanning tool updates and maintenance"
-echo "• Review and adjust security gate thresholds"
-echo "• Security training sessions for development teams"
-echo "• Threat model updates based on new features"
+echo "[MONTHLY] MONTHLY SECURITY ACTIVITIES"  
+echo "--------------------------------------------------------------------"
+echo "- Security scanning tool updates and maintenance"
+echo "- Review and adjust security gate thresholds"
+echo "- Security training sessions for development teams"
+echo "- Threat model updates based on new features"
 echo ""
 
-echo "🎯 QUARTERLY SECURITY ACTIVITIES"
-echo "────────────────────────────────────────────────────────────────────"
-echo "• Comprehensive security posture assessment"
-echo "• Security tooling evaluation and optimization"
-echo "• Penetration testing or security audits"
-echo "• Security process improvement workshops"
+echo "[QUARTERLY] QUARTERLY SECURITY ACTIVITIES"
+echo "--------------------------------------------------------------------"
+echo "- Comprehensive security posture assessment"
+echo "- Security tooling evaluation and optimization"
+echo "- Penetration testing or security audits"
+echo "- Security process improvement workshops"
 echo ""
 
-echo "📊 KEY PERFORMANCE INDICATORS (KPIs)"
-echo "────────────────────────────────────────────────────────────────────"
-echo "• Time to detect vulnerabilities: <24 hours"
-echo "• Time to fix critical vulnerabilities: <7 days"
-echo "• Security scan coverage: 100% of code commits"
-echo "• False positive rate: <10%"
-echo "• Developer security training completion: 100%"
+echo "[KPIs] KEY PERFORMANCE INDICATORS (KPIs)"
+echo "--------------------------------------------------------------------"
+echo "- Time to detect vulnerabilities: <24 hours"
+echo "- Time to fix critical vulnerabilities: <7 days"
+echo "- Security scan coverage: 100% of code commits"
+echo "- False positive rate: <10%"
+echo "- Developer security training completion: 100%"
 EOF
 
 chmod +x security-improvement-plan.sh
