@@ -1,5 +1,86 @@
 # Step 6: CI/CD Pipeline Integration & Security Gates
 
+In this step, you'll wire Semgrep, Dependency-Check, and Grype into CI/CD (e.g., GitHub Actions) and implement security gates to fail builds based on findings.
+
+## Add a GitHub Actions workflow
+
+```bash
+mkdir -p .github/workflows
+cat > .github/workflows/security-scan.yml << 'EOF'
+name: Security Scans
+on: [push, pull_request]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install tools
+        run: |
+          pip install semgrep jq
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          sudo apt-get update && sudo apt-get install -y default-jre unzip wget
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
+          unzip -q dependency-check-8.4.0-release.zip
+          echo "DEP_CHECK=./dependency-check/bin/dependency-check.sh" >> $GITHUB_ENV
+
+      - name: Semgrep SAST
+        run: |
+          semgrep --config=.semgrep.yml --json vulnerable-app/ > semgrep-results.json || true
+          test -s semgrep-results.json
+
+      - name: Dependency-Check
+        run: |
+          $DEP_CHECK --project VulnShop --scan vulnerable-app/ --format "JSON" --out dep-check-reports --prettyPrint || true
+          test -s dep-check-reports/dependency-check-report.json
+
+      - name: Build image
+        run: |
+          docker build -t vulnshop:latest vulnerable-app
+
+      - name: Grype image scan
+        run: |
+          grype vulnshop:latest -o json > grype-results.json || true
+          test -s grype-results.json
+
+      - name: Security gates
+        run: |
+          echo "Evaluate thresholds here (example only)"
+          jq '.results | length' semgrep-results.json
+          jq '.dependencies | length' dep-check-reports/dependency-check-report.json
+          jq '.matches | length' grype-results.json
+EOF
+```{{exec}}
+
+## Add example gate scripts (optional)
+
+```bash
+cat > security-gate-threshold.sh << 'EOF'
+#!/bin/bash
+set -e
+file=${1:-semgrep-results.json}
+limit=${2:-1}
+count=$(jq '.results | length' "$file" 2>/dev/null || echo 0)
+echo "Findings: $count (limit $limit)"
+[ "$count" -le "$limit" ] || { echo "Gate failed"; exit 1; }
+echo "Gate passed"
+EOF
+chmod +x security-gate-threshold.sh
+```{{exec}}
+
+When done, run the verifier for this step:
+
+```bash
+./killerkoda-tutorial/step6-verify.sh
+```{{exec}}
+
+# Step 6: CI/CD Pipeline Integration & Security Gates
+
 ## The Complete DevSecOps Pipeline
 
 Now that you've learned to use all three security scanning tools individually, it's time to integrate them into an automated CI/CD pipeline. This is where DevSecOps really shines - every code change automatically triggers comprehensive security testing.
