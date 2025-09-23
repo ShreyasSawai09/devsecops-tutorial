@@ -4,10 +4,13 @@
 
 echo "Verifying Step 4: Dependency Scanning with OWASP Dependency-Check..."
 
-# Check if dependency-check is installed
-if ! command -v dependency-check &> /dev/null; then
-    echo "[ERROR] Dependency-Check not installed. Run setup or install it."
-    exit 1
+# Check for Dependency-Check availability only if no reports are present
+# Accept either a globally installed binary or the unzipped local script
+if [ ! -d "dep-check-reports" ] && [ ! -d "reports/dependency-check" ]; then
+    if ! command -v dependency-check &> /dev/null && [ ! -x "./dependency-check/bin/dependency-check.sh" ]; then
+        echo "[ERROR] Dependency-Check not installed. Install it or ensure reports are generated."
+        exit 1
+    fi
 fi
 
 # Check if reports exist

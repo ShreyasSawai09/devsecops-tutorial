@@ -44,9 +44,9 @@ echo ""
 # Dependency Scan Results  
 echo "📦 DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
 echo "════════════════════════════════════════════════════════════════"
-if [ -f dependency-check-report/dependency-check-report.json ]; then
+if [ -f dep-check-reports/dependency-check-report.json ]; then
     echo "Status: 🔴 VULNERABILITIES FOUND"
-    echo "Vulnerable Dependencies: $(jq '.dependencies | length' dependency-check-report/dependency-check-report.json 2>/dev/null || echo "N/A")"
+    echo "Vulnerable Dependencies: $(jq '[.dependencies[] | select(.vulnerabilities)] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "N/A")"
     echo "├── High Severity: TBD"
     echo "└── Medium Severity: TBD"
 else
@@ -59,8 +59,8 @@ echo ""
 # Container Scan Results
 echo "🐳 CONTAINER IMAGE SCANNING - Grype"  
 echo "════════════════════════════════════════════════════════════════"
-if [ -f grype-report.json ]; then
-    CONTAINER_VULNS=$(jq '.matches | length' grype-report.json 2>/dev/null || echo "0")
+if [ -f grype-results.json ]; then
+    CONTAINER_VULNS=$(jq '.matches | length' grype-results.json 2>/dev/null || echo "0")
     echo "Status: 🔴 VULNERABILITIES FOUND"
     echo "Container Vulnerabilities: $CONTAINER_VULNS"
 else

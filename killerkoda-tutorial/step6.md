@@ -95,7 +95,7 @@ echo "=== STRICT SECURITY GATE ==="
 
 # Any critical vulnerability fails the build
 SEMGREP_CRITICAL=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json 2>/dev/null || echo "0")
-DEP_HIGH=$(jq '.dependencies[]? | select(.vulnerabilities[]?.severity=="HIGH") | length' dep-check-results.json 2>/dev/null || echo "0")
+DEP_HIGH=$(jq '[.dependencies[].vulnerabilities[] | select(.severity=="HIGH" or .severity=="CRITICAL")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
 
 TOTAL_CRITICAL=$((SEMGREP_CRITICAL + DEP_HIGH))
 
