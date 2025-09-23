@@ -124,7 +124,7 @@ cat > dependency-security-gate.sh << 'EOF'
 echo "=== DEPENDENCY SECURITY GATE ==="
 
 if [ ! -f "dep-check-reports/dependency-check-report.json" ]; then
-  echo "❌ No dependency scan results found"
+  echo "No dependency scan results found"
   exit 1
 fi
 
@@ -144,7 +144,7 @@ if [ "$HIGH_CRITICAL" -gt 0 ]; then
   echo "Action required: Update vulnerable dependencies before deployment"
   exit 1
 else
-  echo "✅ SECURITY GATE PASSED: No high/critical dependency vulnerabilities"
+  echo "SECURITY GATE PASSED: No high/critical dependency vulnerabilities"
 fi
 EOF
 
@@ -200,7 +200,7 @@ Key options used in CI:
 - `--out reports/dependency-check` save artifacts for review
 - `--suppression suppressions.xml` ignore known false positives
 
-## Easter Egg Clue #2 🔍
+## Easter Egg Clue #2
 
 Looking at the dependency scan results, notice that some of the vulnerable packages we're using are related to serialization and cryptography. Combined with the hardcoded secret key from the SAST scan, this creates an interesting attack chain. The admin endpoints might be more accessible than they appear...
 
@@ -235,18 +235,18 @@ if [ -f "dep-check-reports/dependency-check-report.json" ]; then
   MEDIUM=$(jq '[.dependencies[].vulnerabilities[] | select(.severity == "MEDIUM")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
   LOW=$(jq '[.dependencies[].vulnerabilities[] | select(.severity == "LOW")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
   
-  echo "📊 STATISTICS:"
+  echo "STATISTICS:"
   echo "Total Dependencies: $TOTAL_DEPS"
   echo "Vulnerable Dependencies: $VULNERABLE_DEPS"
   echo "Total Vulnerabilities: $TOTAL_VULNS"
   echo ""
-  echo "🚨 BY SEVERITY:"
+  echo "BY SEVERITY:"
   echo "Critical: $CRITICAL"
   echo "High: $HIGH"
   echo "Medium: $MEDIUM"
   echo "Low: $LOW"
   echo ""
-  echo "🎯 RISK ASSESSMENT:"
+  echo "RISK ASSESSMENT:"
   if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
     echo "Risk Level: HIGH - Immediate action required"
   elif [ "$MEDIUM" -gt 0 ]; then
