@@ -17,6 +17,11 @@
         "title": "Static Application Security Testing (SAST) with Semgrep",
         "text": "step3.md",
         "verify": "step3-verify.sh"
+      },
+      {
+        "title": "Dependency Scanning with OWASP Dependency-Check",
+        "text": "step4.md",
+        "verify": "step4-verify.sh"
       }
     ],
     "intro": {
