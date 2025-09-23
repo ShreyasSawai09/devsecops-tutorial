@@ -49,8 +49,8 @@ CRIT=$(jq '[.matches[] | select(.vulnerability.severity=="Critical")] | length' 
 HIGH=$(jq '[.matches[] | select(.vulnerability.severity=="High")] | length' "$FILE")
 echo "Critical: $CRIT | High: $HIGH"
 if [ "$CRIT" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
-  echo "🚨 SECURITY GATE FAILED"; exit 1; fi
-echo "✅ SECURITY GATE PASSED"
+  echo "SECURITY GATE FAILED"; exit 1; fi
+echo "SECURITY GATE PASSED"
 EOF
 chmod +x grype-security-gate.sh
 ./grype-security-gate.sh || true
@@ -187,7 +187,7 @@ cat > container-security-gate.sh << 'EOF'
 echo "=== CONTAINER SECURITY GATE ==="
 
 if [ ! -f "grype-results.json" ]; then
-  echo "❌ No container scan results found"
+  echo "No container scan results found"
   exit 1
 fi
 
@@ -202,7 +202,7 @@ echo "High/Critical vulnerabilities: $HIGH_CRITICAL"
 THRESHOLD=0  # Zero tolerance for high/critical in production
 
 if [ "$HIGH_CRITICAL" -gt "$THRESHOLD" ]; then
-  echo "🚨 SECURITY GATE FAILED: $HIGH_CRITICAL high/critical vulnerabilities exceed threshold ($THRESHOLD)"
+  echo "SECURITY GATE FAILED: $HIGH_CRITICAL high/critical vulnerabilities exceed threshold ($THRESHOLD)"
   echo ""
   echo "Most critical vulnerabilities:"
   jq -r '.matches[] | select(.vulnerability.severity == "High" or .vulnerability.severity == "Critical") | 
@@ -211,7 +211,7 @@ if [ "$HIGH_CRITICAL" -gt "$THRESHOLD" ]; then
   echo "Action required: Update base image or vulnerable packages"
   exit 1
 else
-  echo "✅ SECURITY GATE PASSED: Container vulnerabilities within acceptable threshold"
+  echo "SECURITY GATE PASSED: Container vulnerabilities within acceptable threshold"
 fi
 EOF
 
@@ -342,9 +342,9 @@ echo "Running container scan with CI settings..."
 
 # Simulate CI scan with failure on high/critical
 if grype vulnshop:workshop --fail-on high --output json > ci-grype-results.json; then
-  echo "✅ CI SCAN PASSED: No high/critical vulnerabilities"
+  echo "CI SCAN PASSED: No high/critical vulnerabilities"
 else
-  echo "❌ CI SCAN FAILED: High/critical vulnerabilities detected"
+  echo "CI SCAN FAILED: High/critical vulnerabilities detected"
   echo "Build would be blocked in CI/CD pipeline"
 fi
 ```{{exec}}
@@ -371,14 +371,14 @@ if [ -f "grype-results.json" ]; then
   # Calculate risk score (Critical=10, High=7, Medium=4, Low=1)
   RISK_SCORE=$(echo "($CRITICAL * 10) + ($HIGH * 7) + ($MEDIUM * 4) + ($LOW * 1)" | bc 2>/dev/null || echo "0")
   
-  echo "📊 VULNERABILITY STATISTICS:"
+  echo "VULNERABILITY STATISTICS:"
   echo "Total: $TOTAL"
   echo "Critical: $CRITICAL"
   echo "High: $HIGH"
   echo "Medium: $MEDIUM"
   echo "Low: $LOW"
   echo ""
-  echo "🎯 RISK ASSESSMENT:"
+  echo "RISK ASSESSMENT:"
   echo "Risk Score: $RISK_SCORE"
   
   if [ "$CRITICAL" -gt 0 ]; then
@@ -392,7 +392,7 @@ if [ -f "grype-results.json" ]; then
   fi
   
   echo ""
-  echo "📦 TOP VULNERABLE PACKAGES:"
+  echo "TOP VULNERABLE PACKAGES:"
   jq -r '.matches[] | select(.vulnerability.severity == "Critical" or .vulnerability.severity == "High") | 
     "\(.artifact.name) \(.artifact.version) - \(.vulnerability.severity)"' grype-results.json | sort | uniq -c | sort -nr | head -5
 fi
@@ -409,17 +409,17 @@ Container scanning integrates with various security tools:
 ```bash
 echo "=== CONTAINER SECURITY INTEGRATION ==="
 echo ""
-echo "🔄 CI/CD Integration:"
+echo "CI/CD Integration:"
 echo "- GitHub Actions: Upload SARIF results"
 echo "- Jenkins: Parse JSON results for build gates"
 echo "- GitLab: Native container scanning support"
 echo ""
-echo "🛡️ Security Platform Integration:"
+echo "Security Platform Integration:"
 echo "- SARIF format for security dashboards"
 echo "- JSON for custom reporting tools"
 echo "- Webhook notifications for new vulnerabilities"
 echo ""
-echo "📊 Monitoring Integration:"
+echo "Monitoring Integration:"
 echo "- Prometheus metrics from scan results"
 echo "- Grafana dashboards for vulnerability trends"
 echo "- Alert manager for critical findings"
