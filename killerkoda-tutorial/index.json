@@ -22,6 +22,11 @@
         "title": "Dependency Scanning with OWASP Dependency-Check",
         "text": "step4.md",
         "verify": "step4-verify.sh"
+      },
+      {
+        "title": "Container Image Scanning with Grype",
+        "text": "step5.md",
+        "verify": "step5-verify.sh"
       }
     ],
     "intro": {
