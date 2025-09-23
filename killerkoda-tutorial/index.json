@@ -17,16 +17,6 @@
         "title": "Static Application Security Testing (SAST) with Semgrep",
         "text": "step3.md",
         "verify": "step3-verify.sh"
-      },
-      {
-        "title": "CI/CD Pipeline Integration & Security Gates",
-        "text": "step6.md",
-        "verify": "step6-verify.sh"
-      },
-      {
-        "title": "Security Reporting & Remediation Strategies",
-        "text": "step7.md",
-        "verify": "step7-verify.sh"
       }
     ],
     "intro": {
