@@ -26,12 +26,12 @@ Over the past 45-60 minutes, you have:
 
 You now have:
 
-✅ **Deep understanding** of DevSecOps principles and practices
-✅ **Hands-on experience** with three industry-standard security tools
-✅ **Complete CI/CD pipeline** with automated security scanning
-✅ **Security reporting capabilities** for different audiences
-✅ **Remediation strategies** for common vulnerability types
-✅ **Easter egg discovery** demonstrating vulnerability chaining
+✅ **Deep understanding** of DevSecOps principles and practices <br>
+✅ **Hands-on experience** with three industry-standard security tools <br>
+✅ **Complete CI/CD pipeline** with automated security scanning <br>
+✅ **Security reporting capabilities** for different audiences <br>
+✅ **Remediation strategies** for common vulnerability types <br>
+✅ **Easter egg discovery** demonstrating vulnerability chaining <br>
 
 ## Next Steps in Your DevSecOps Journey
 

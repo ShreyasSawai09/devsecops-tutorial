@@ -340,21 +340,19 @@ chmod +x container-security-metrics.sh
 
 Container scanning integrates with various security tools:
 
-```bash
-echo "=== CONTAINER SECURITY INTEGRATION ==="
-echo ""
-echo "CI/CD Integration:"
-echo "- GitHub Actions: Upload SARIF results"
-echo "- Jenkins: Parse JSON results for build gates"
-echo "- GitLab: Native container scanning support"
-echo ""
-echo "Security Platform Integration:"
-echo "- SARIF format for security dashboards"
-echo "- JSON for custom reporting tools"
-echo "- Webhook notifications for new vulnerabilities"
-echo ""
-echo "Monitoring Integration:"
-echo "- Prometheus metrics from scan results"
-echo "- Grafana dashboards for vulnerability trends"
-echo "- Alert manager for critical findings"
-```{{exec}}
+===CONTAINER SECURITY INTEGRATION===
+
+CI/CD Integration:
+- GitHub Actions: Upload SARIF results
+- Jenkins: Parse JSON results for build gates
+- GitLab: Native container scanning support
+
+Security Platform Integration:
+- SARIF format for security dashboards
+- JSON for custom reporting tools
+- Webhook notifications for new vulnerabilities
+
+Monitoring Integration:
+- Prometheus metrics from scan results
+- Grafana dashboards for vulnerability trends
+- Alert manager for critical findings
