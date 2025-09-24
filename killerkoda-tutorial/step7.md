@@ -1,41 +1,3 @@
-# Step 7: Security Reporting & Final Verification
-
-In this final step, you'll generate reports, summaries, and run the consolidated verification to ensure every step is complete.
-
-## Create reporting helpers (optional)
-
-```bash
-cat > security-dashboard.sh << 'EOF'
-#!/bin/bash
-echo "Security Dashboard (stub)" && exit 0
-EOF
-chmod +x security-dashboard.sh
-
-cat > detailed-vulnerability-report.sh << 'EOF'
-#!/bin/bash
-echo "Detailed Vulnerability Report (stub)" && exit 0
-EOF
-chmod +x detailed-vulnerability-report.sh
-
-cat > remediation-guide.sh << 'EOF'
-#!/bin/bash
-echo "Remediation Guide (stub)" && exit 0
-EOF
-chmod +x remediation-guide.sh
-
-cat > executive-summary.sh << 'EOF'
-#!/bin/bash
-echo "Executive Summary (stub)" && exit 0
-EOF
-chmod +x executive-summary.sh
-```{{exec}}
-
-## Run final verification
-
-```bash
-./killerkoda-tutorial/step7-verify.sh
-```{{exec}}
-
 # Step 7: Security Reporting & Remediation Strategies
 
 ## The Importance of Actionable Security Reports
@@ -51,11 +13,11 @@ cat > security-dashboard.sh << 'EOF'
 #!/bin/bash
 
 echo "╔═══════════════════════════════════════════════════════════════════════════════╗"
-echo "║                          DEVSECOPS SECURITY DASHBOARD                        ║"
+echo "║                          DEVSECOPS SECURITY DASHBOARD                         ║"
 echo "╠═══════════════════════════════════════════════════════════════════════════════╣"
 echo "║  Application: VulnShop                                                        ║"
-echo "║  Scan Date: $(date)                                ║"
-echo "║  Pipeline: Automated DevSecOps Security Scanning                             ║"
+echo "║  Scan Date: $(date)                                                           ║"
+echo "║  Pipeline: Automated DevSecOps Security Scanning                              ║"
 echo "╚═══════════════════════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -67,7 +29,7 @@ if [ -f semgrep-results.json ]; then
     CRITICAL_SAST=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-results.json)
     WARNING_SAST=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-results.json)
     
-    echo "Status: 🔴 ISSUES FOUND"
+    echo "Status:  ISSUES FOUND"
     echo "Total Findings: $TOTAL_SAST"
     echo "├── Critical (ERROR): $CRITICAL_SAST"
     echo "└── Warning: $WARNING_SAST"
@@ -75,54 +37,54 @@ if [ -f semgrep-results.json ]; then
     echo "Top Critical Issues:"
     jq -r '.results[] | select(.extra.severity=="ERROR") | "  • \(.check_id) (\(.path):\(.start.line))"' semgrep-results.json | head -5
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status:  NOT SCANNED"
 fi
 echo ""
 
 # Dependency Scan Results  
-echo "📦 DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
+echo " DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
 echo "════════════════════════════════════════════════════════════════"
 if [ -f dependency-check-report/dependency-check-report.json ]; then
-    echo "Status: 🔴 VULNERABILITIES FOUND"
+    echo "Status:  VULNERABILITIES FOUND"
     echo "Vulnerable Dependencies: $(jq '.dependencies | length' dependency-check-report/dependency-check-report.json 2>/dev/null || echo "N/A")"
     echo "├── High Severity: TBD"
     echo "└── Medium Severity: TBD"
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status:  NOT SCANNED"
     echo "Note: Dependency scan results would show vulnerable packages"
     echo "Expected findings: urllib3, setuptools, requests"
 fi
 echo ""
 
 # Container Scan Results
-echo "🐳 CONTAINER IMAGE SCANNING - Grype"  
+echo " CONTAINER IMAGE SCANNING - Grype"  
 echo "════════════════════════════════════════════════════════════════"
 if [ -f grype-report.json ]; then
     CONTAINER_VULNS=$(jq '.matches | length' grype-report.json 2>/dev/null || echo "0")
-    echo "Status: 🔴 VULNERABILITIES FOUND"
+    echo "Status:  VULNERABILITIES FOUND"
     echo "Container Vulnerabilities: $CONTAINER_VULNS"
 else
-    echo "Status: ⚪ NOT SCANNED"
+    echo "Status:  NOT SCANNED"
     echo "Note: Container scan would show base image and package vulnerabilities"
 fi
 echo ""
 
 # Security Gate Status
-echo "🚦 SECURITY GATE EVALUATION"
+echo " SECURITY GATE EVALUATION"
 echo "════════════════════════════════════════════════════════════════"
 if [ "$CRITICAL_SAST" -gt 0 ] 2>/dev/null; then
-    echo "Overall Status: ❌ FAILED"
+    echo "Overall Status:  FAILED"
     echo "Reason: Critical vulnerabilities detected in source code"
     echo "Action Required: Fix critical SAST findings before deployment"
-    echo "Deployment: 🚫 BLOCKED"
+    echo "Deployment:  BLOCKED"
 else
-    echo "Overall Status: ✅ PASSED"  
-    echo "Deployment: 🚀 APPROVED"
+    echo "Overall Status:  PASSED"  
+    echo "Deployment:  APPROVED"
 fi
 echo ""
 
 # Remediation Priority
-echo "🎯 REMEDIATION PRIORITY MATRIX"
+echo " REMEDIATION PRIORITY MATRIX"
 echo "════════════════════════════════════════════════════════════════"
 echo "Priority 1 (Critical): Fix immediately before any deployment"
 if [ -f semgrep-results.json ]; then
@@ -157,7 +119,7 @@ echo "════════════════════════�
 echo ""
 
 if [ -f semgrep-results.json ]; then
-    echo "🔍 STATIC APPLICATION SECURITY TESTING DETAILED RESULTS"
+    echo " STATIC APPLICATION SECURITY TESTING DETAILED RESULTS"
     echo "───────────────────────────────────────────────────────────────────"
     
     # Process each vulnerability
@@ -199,7 +161,7 @@ Generate specific remediation instructions for developers:
 cat > remediation-guide.sh << 'EOF'
 #!/bin/bash
 
-echo "🛠️  VULNERABILITY REMEDIATION GUIDE"
+echo "  VULNERABILITY REMEDIATION GUIDE"
 echo "════════════════════════════════════════════════════════════════════"
 echo "This guide provides step-by-step instructions to fix identified vulnerabilities."
 echo ""
@@ -209,7 +171,7 @@ if [ -f semgrep-results.json ]; then
     VULN_TYPES=$(jq -r '.results[].check_id' semgrep-results.json | sort -u)
     
     for vuln in $VULN_TYPES; do
-        echo "📋 FIXING: $vuln"
+        echo " FIXING: $vuln"
         echo "────────────────────────────────────────────────────────────────────"
         
         case $vuln in
@@ -368,15 +330,15 @@ if [ -f semgrep-results.json ]; then
     RISK_SCORE=$(( CRITICAL * 10 + WARNING * 3 ))
     
     if [ "$RISK_SCORE" -gt 20 ]; then
-        RISK_LEVEL="🔴 HIGH"
+        RISK_LEVEL=" HIGH"
     elif [ "$RISK_SCORE" -gt 10 ]; then
-        RISK_LEVEL="🟡 MEDIUM" 
+        RISK_LEVEL=" MEDIUM" 
     else
-        RISK_LEVEL="🟢 LOW"
+        RISK_LEVEL=" LOW"
     fi
 else
     RISK_SCORE=0
-    RISK_LEVEL="🟢 LOW"
+    RISK_LEVEL=" LOW"
     TOTAL=0
     CRITICAL=0
     WARNING=0
@@ -393,25 +355,25 @@ echo ""
 
 echo "SECURITY POSTURE"
 echo "────────────────────────────────────────────────────────────────────"
-echo "DevSecOps Implementation: ✅ ACTIVE"
-echo "├── SAST Scanning: ✅ Implemented (Semgrep)"
-echo "├── Dependency Scanning: ✅ Implemented (OWASP DC)"
-echo "└── Container Scanning: ✅ Implemented (Grype)"
+echo "DevSecOps Implementation:  ACTIVE"
+echo "├── SAST Scanning:  Implemented (Semgrep)"
+echo "├── Dependency Scanning:  Implemented (OWASP DC)"
+echo "└── Container Scanning:  Implemented (Grype)"
 echo ""
 echo "Security Gate Status: FAILING"
 echo "Deployment Status: BLOCKED"
 echo ""
 
-echo "💼 BUSINESS IMPACT"
+echo " BUSINESS IMPACT"
 echo "────────────────────────────────────────────────────────────────────"
 if [ "$CRITICAL" -gt 0 ]; then
-    echo "Immediate Risk: 🔴 HIGH"
+    echo "Immediate Risk:  HIGH"
     echo "• Potential for data breach and system compromise"
     echo "• Risk of regulatory compliance violations"
     echo "• Possible reputational damage and customer loss"
     echo "• Estimated cost of breach: \$2M - \$5M"
 else
-    echo "Immediate Risk: 🟢 LOW"
+    echo "Immediate Risk:  LOW"
     echo "• No critical vulnerabilities identified"
 fi
 echo ""
@@ -434,7 +396,7 @@ echo "• Establish bug bounty or penetration testing program"
 echo "• Regular security architecture reviews"
 echo ""
 
-echo "💰 INVESTMENT REQUIREMENTS"
+echo " INVESTMENT REQUIREMENTS"
 echo "────────────────────────────────────────────────────────────────────"
 echo "DevSecOps Tooling: \$15,000/year (Already implemented)"
 echo "Security Training: \$25,000 (One-time)"
@@ -496,7 +458,7 @@ echo "• Analyze security metrics trends"
 echo "• Conduct team security knowledge sharing"
 echo ""
 
-echo "📅 MONTHLY SECURITY ACTIVITIES"  
+echo " MONTHLY SECURITY ACTIVITIES"  
 echo "────────────────────────────────────────────────────────────────────"
 echo "• Security scanning tool updates and maintenance"
 echo "• Review and adjust security gate thresholds"
@@ -504,7 +466,7 @@ echo "• Security training sessions for development teams"
 echo "• Threat model updates based on new features"
 echo ""
 
-echo "🎯 QUARTERLY SECURITY ACTIVITIES"
+echo " QUARTERLY SECURITY ACTIVITIES"
 echo "────────────────────────────────────────────────────────────────────"
 echo "• Comprehensive security posture assessment"
 echo "• Security tooling evaluation and optimization"
@@ -512,7 +474,7 @@ echo "• Penetration testing or security audits"
 echo "• Security process improvement workshops"
 echo ""
 
-echo "📊 KEY PERFORMANCE INDICATORS (KPIs)"
+echo " KEY PERFORMANCE INDICATORS (KPIs)"
 echo "────────────────────────────────────────────────────────────────────"
 echo "• Time to detect vulnerabilities: <24 hours"
 echo "• Time to fix critical vulnerabilities: <7 days"
