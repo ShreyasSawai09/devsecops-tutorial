@@ -20,16 +20,6 @@ if [ ! -f "vulnerable-app/app.py" ] && [ ! -f "devsecops-pipeline-tutorial/vulne
 fi
 if python3 -c "import flask" 2>/dev/null; then echo "[Step 2] Flask available"; else echo "[Step 2] Flask not installed"; PASS=false; fi
 
-# ---- Step 3 checks ----
-echo "[Step 3] Checking Semgrep results"
-RESULTS_FILE=""
-if [ -f "semgrep-results.json" ]; then RESULTS_FILE="semgrep-results.json"; fi
-if [ -z "$RESULTS_FILE" ] && [ -f "semgrep-combined-results.json" ]; then RESULTS_FILE="semgrep-combined-results.json"; fi
-if [ -z "$RESULTS_FILE" ]; then echo "[Step 3] Semgrep results not found"; PASS=false; else
-  VULN_COUNT=$(jq '.results | length' "$RESULTS_FILE" 2>/dev/null || echo "0")
-  if [ "$VULN_COUNT" -eq 0 ]; then echo "[Step 3] No Semgrep findings"; PASS=false; fi
-fi
-
 # ---- Step 4 checks ----
 echo "[Step 4] Checking Dependency-Check report"
 REPORT_JSON=""

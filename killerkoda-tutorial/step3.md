@@ -75,7 +75,9 @@ cat .semgrep.yml
 
 Understanding rule structure is essential for creating effective security policies. Let's break down how Semgrep rules work by examining a typical SQL injection detection pattern:
 
-───────────────────────────────────────
+```bash
+echo "───────────────────────────────────────"
+cat << 'EOF'
 - id: sql-injection-string-concat
   patterns:
     - pattern-either:
@@ -93,6 +95,8 @@ BREAKDOWN:
 • $CURSOR, $VAR: Metavariables that match any expression
 • message: Description shown to developers
 • severity: ERROR/WARNING/INFO classification
+EOF
+```{{exec}}
 
 **What this means:** The rule above uses "metavariables" (like $CURSOR and $VAR) that act as wildcards, allowing Semgrep to find SQL injection patterns regardless of variable names. This makes the rule both powerful and flexible.
 
@@ -206,12 +210,21 @@ Understanding different output formats is crucial for integrating SAST into your
 
 Different CI/CD systems and security tools expect different output formats. Here are the main options:
 
-Demonstrating different Semgrep output formats for CI/CD integration:
-
-1. JSON Format (for automation and custom processing): semgrep --config=auto --json vulnerable-app/
-2. SARIF Format (for GitHub Security tab integration): semgrep --config=auto --sarif vulnerable-app/
-3. GitLab SAST Format (for GitLab security features): semgrep --config=auto --gitlab-sast vulnerable-app/
-4. JUnit XML (for test integration and reporting): semgrep --config=auto --junit-xml vulnerable-app/
+```bash
+echo "Demonstrating different Semgrep output formats for CI/CD integration:"
+echo ""
+echo "1. JSON Format (for automation and custom processing):"
+echo "   semgrep --config=auto --json vulnerable-app/"
+echo ""
+echo "2. SARIF Format (for GitHub Security tab integration):"
+echo "   semgrep --config=auto --sarif vulnerable-app/"
+echo ""
+echo "3. GitLab SAST Format (for GitLab security features):"
+echo "   semgrep --config=auto --gitlab-sast vulnerable-app/"
+echo ""
+echo "4. JUnit XML (for test integration and reporting):"
+echo "   semgrep --config=auto --junit-xml vulnerable-app/"
+```{{exec}}
 
 **What this shows:** The different output formats available for integrating Semgrep into various CI/CD platforms and security tools. Each format serves a specific purpose in the DevSecOps toolchain.
 
