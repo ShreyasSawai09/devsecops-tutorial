@@ -6,11 +6,20 @@ Security scanning is only valuable if the results lead to actual security improv
 
 ## Comprehensive Security Dashboard
 
+Lets copy results from the previous scans
+
+```bash
+cp semgrep-combined-results.json semgrep-results.json
+./security-dashboard.sh
+```{{exec}}
+
+
 Let's create a unified security dashboard that combines results from all three scanning tools:
 
 ```bash
 cat > security-dashboard.sh << 'EOF'
 #!/bin/bash
+
 
 echo "╔═══════════════════════════════════════════════════════════════════════════════╗"
 echo "║                          DEVSECOPS SECURITY DASHBOARD                         ║"

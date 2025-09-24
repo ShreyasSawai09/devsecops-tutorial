@@ -52,6 +52,24 @@ Semgrep is a modern SAST tool that uses pattern-based static analysis to find se
 │  └─────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+### Security Tool Installation
+
+Install Semgrep for Static Application Security Testing:
+
+```bash
+pip3 install --user semgrep --break-system-packages
+```{{exec}}
+
+Add Semgrep to PATH and make it permanent
+```bash
+export PATH="/root/.local/bin:$PATH"
+echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
+```{{exec}}
+
+Verify Semgrep installation:
+```bash
+echo "  ✓ Semgrep: $(which semgrep > /dev/null && echo 'Ready' || echo 'Missing')"
+```{{exec}}
 
 ## Semgrep Rule Structure and Customization
 
@@ -75,9 +93,6 @@ cat .semgrep.yml
 
 Understanding rule structure is essential for creating effective security policies. Let's break down how Semgrep rules work by examining a typical SQL injection detection pattern:
 
-```bash
-echo "───────────────────────────────────────"
-cat << 'EOF'
 - id: sql-injection-string-concat
   patterns:
     - pattern-either:
@@ -89,14 +104,12 @@ cat << 'EOF'
   severity: ERROR
 
 BREAKDOWN:
-• id: Unique identifier for this rule
-• patterns: What code patterns to match
-• pattern-either: Match any of these patterns
-• $CURSOR, $VAR: Metavariables that match any expression
-• message: Description shown to developers
-• severity: ERROR/WARNING/INFO classification
-EOF
-```{{exec}}
+• id: Unique identifier for this rule <br>
+• patterns: What code patterns to match <br>
+• pattern-either: Match any of these patterns <br>
+• $CURSOR, $VAR: Metavariables that match any expression <br>
+• message: Description shown to developers <br>
+• severity: ERROR/WARNING/INFO classification <br>
 
 **What this means:** The rule above uses "metavariables" (like $CURSOR and $VAR) that act as wildcards, allowing Semgrep to find SQL injection patterns regardless of variable names. This makes the rule both powerful and flexible.
 
@@ -145,7 +158,6 @@ Now let's analyze the community rule findings to understand what additional vuln
 
 ```bash
 echo "Total findings: $(jq '.results | length' semgrep-community-results.json)"
-echo ""
 echo "Findings by severity:"
 echo "• Critical: $(jq '[.results[] | select(.extra.severity=="ERROR")] | length' semgrep-community-results.json)"
 echo "• Warning: $(jq '[.results[] | select(.extra.severity=="WARNING")] | length' semgrep-community-results.json)"
@@ -169,7 +181,6 @@ WARNING_COUNT=$(jq '[.results[] | select(.extra.severity=="WARNING")] | length' 
 echo "Total Unique Vulnerabilities: $TOTAL_FINDINGS"
 echo "Critical (ERROR): $CRITICAL_COUNT"
 echo "Warning: $WARNING_COUNT"
-echo ""
 ```{{exec}}
 
 **What this command does:** The `jq` command merges the JSON results from both scans, removing duplicates, and then counts vulnerabilities by severity level.
@@ -210,21 +221,12 @@ Understanding different output formats is crucial for integrating SAST into your
 
 Different CI/CD systems and security tools expect different output formats. Here are the main options:
 
-```bash
-echo "Demonstrating different Semgrep output formats for CI/CD integration:"
-echo ""
-echo "1. JSON Format (for automation and custom processing):"
-echo "   semgrep --config=auto --json vulnerable-app/"
-echo ""
-echo "2. SARIF Format (for GitHub Security tab integration):"
-echo "   semgrep --config=auto --sarif vulnerable-app/"
-echo ""
-echo "3. GitLab SAST Format (for GitLab security features):"
-echo "   semgrep --config=auto --gitlab-sast vulnerable-app/"
-echo ""
-echo "4. JUnit XML (for test integration and reporting):"
-echo "   semgrep --config=auto --junit-xml vulnerable-app/"
-```{{exec}}
+Demonstrating different Semgrep output formats for CI/CD integration:
+
+1. JSON Format (for automation and custom processing): semgrep --config=auto --json vulnerable-app/
+2. SARIF Format (for GitHub Security tab integration): semgrep --config=auto --sarif vulnerable-app/
+3. GitLab SAST Format (for GitLab security features): semgrep --config=auto --gitlab-sast vulnerable-app/
+4. JUnit XML (for test integration and reporting): semgrep --config=auto --junit-xml vulnerable-app/
 
 **What this shows:** The different output formats available for integrating Semgrep into various CI/CD platforms and security tools. Each format serves a specific purpose in the DevSecOps toolchain.
 
@@ -249,14 +251,12 @@ echo "Scan Results:"
 echo "• Total Issues: $TOTAL_ISSUES"
 echo "• Critical: $CRITICAL_ISSUES"  
 echo "• High: $HIGH_ISSUES"
-echo ""
 
 # Security gate logic
 if [ "$CRITICAL_ISSUES" -gt 0 ]; then
     echo "SECURITY GATE FAILED"
     echo "   Critical vulnerabilities detected: $CRITICAL_ISSUES"
     echo "   Build should be blocked in CI/CD pipeline"
-    echo ""
     echo "Critical Issues:"
     jq -r '.results[] | select(.extra.severity=="ERROR") | "   • \(.check_id) (\(.path):\(.start.line))"' gate-scan-results.json
     exit 1

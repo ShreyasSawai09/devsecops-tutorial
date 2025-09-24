@@ -113,51 +113,6 @@ Check system package manager
 apt --version
 ```{{exec}}
 
-### Security Tool Installation
-
-Install the security scanning tools we'll use throughout this tutorial:
-
-Install Semgrep for Static Application Security Testing
-```bash
-pip3 install --user semgrep --break-system-packages
-```{{exec}}
-
-Add Semgrep to PATH and make it permanent
-```bash
-export PATH="/root/.local/bin:$PATH"
-echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
-```{{exec}}
-
-Verify Semgrep installation
-```bash
-semgrep --version
-```{{exec}}
-
-Install OWASP Dependency Check
-```bash
-wget -O dependency-check.zip https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
-```{{exec}}
-
-Extract and set up Dependency Check
-```bash
-unzip dependency-check.zip && sudo mv dependency-check /opt/
-```{{exec}}
-
-```bash
-sudo ln -sf /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
-```{{exec}}
-
-Install Grype for container scanning
-```bash
-curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-```{{exec}}
-
-Verify all security tools are installed
-```bash
-echo "Semgrep: $(semgrep --version | head -1)"
-echo "Dependency Check: $(dependency-check --version 2>/dev/null | head -1 || echo 'Installed')"
-echo "Grype: $(grype version | head -1)"
-```{{exec}}
 
 ### Project Repository Setup
 
@@ -275,21 +230,6 @@ Verify your complete environment setup:
 Check project structure:
 ```bash
 ls -la
-```{{exec}}
-
-Verify Semgrep installation:
-```bash
-echo "  ✓ Semgrep: $(which semgrep > /dev/null && echo 'Ready' || echo 'Missing')"
-```{{exec}}
-
-Verify OWASP Dependency Check installation:
-```bash
-echo "  ✓ Dependency Check: $(which dependency-check > /dev/null && echo 'Ready' || echo 'Missing')"
-```{{exec}}
-
-Verify Grype installation:
-```bash
-echo "  ✓ Grype: $(which grype > /dev/null && echo 'Ready' || echo 'Missing')"
 ```{{exec}}
 
 Check Docker availability:

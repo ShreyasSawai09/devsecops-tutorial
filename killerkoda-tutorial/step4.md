@@ -34,16 +34,20 @@ Notice the deliberately vulnerable packages:
 
 First, let's install Java (required for Dependency-Check) and then the OWASP Dependency-Check tool:
 
+Install Java (required for dependency-check)
 ```bash
-# Install Java (required for dependency-check)
 sudo apt update
 sudo apt install -y openjdk-11-jdk
+```{{exec}}
 
-# Set JAVA_HOME environment variable
+Set JAVA_HOME environment variable
+```bash
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 echo 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64' >> ~/.bashrc
+```{{exec}}
 
 # Download and install Dependency-Check
+```bash
 wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
 unzip dependency-check-8.4.0-release.zip
 chmod +x dependency-check/bin/dependency-check.sh

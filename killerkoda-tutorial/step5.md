@@ -159,29 +159,27 @@ chmod +x container-security-gate.sh
 
 Based on the scan results, here are common hardening strategies:
 
-```bash
-echo "=== CONTAINER SECURITY HARDENING GUIDE ==="
-echo ""
-echo "1. BASE IMAGE SECURITY:"
-echo "   - Use minimal base images (alpine, distroless)"
-echo "   - Regularly update base images"
-echo "   - Use specific version tags, not 'latest'"
-echo ""
-echo "2. USER SECURITY:"
-echo "   - Run as non-root user"
-echo "   - Use USER directive in Dockerfile"
-echo "   - Set appropriate file permissions"
-echo ""
-echo "3. PACKAGE MANAGEMENT:"
-echo "   - Remove package managers after installation"
-echo "   - Clean package caches"
-echo "   - Install only necessary packages"
-echo ""
-echo "4. CONFIGURATION:"
-echo "   - Use read-only filesystems where possible"
-echo "   - Limit container capabilities"
-echo "   - Use security contexts in Kubernetes"
-```{{exec}}
+=== CONTAINER SECURITY HARDENING GUIDE ===
+
+1. BASE IMAGE SECURITY:
+- Use minimal base images (alpine, distroless)
+- Regularly update base images
+- Use specific version tags, not latest
+
+2. USER SECURITY:
+- Run as non-root user
+- Use USER directive in Dockerfile
+- Set appropriate file permissions
+
+3. PACKAGE MANAGEMENT:
+- Remove package managers after installation
+- Clean package caches
+- Install only necessary packages
+
+4. CONFIGURATION:
+- Use read-only filesystems where possible
+- Limit container capabilities
+- Use security contexts in Kubernetes
 
 ## Creating a Secure Dockerfile
 
