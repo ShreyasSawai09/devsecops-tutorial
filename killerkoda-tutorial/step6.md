@@ -114,9 +114,9 @@ Our complete security pipeline follows this flow:
          │  ┌─────────┐              ┌─────────────┐           │
          │  │   YES   │              │     NO      │           │
          │  │         ▼              │             ▼           │
-         │  │  ❌ FAIL BUILD         │  ✅ CONTINUE             │
-         │  │  📧 NOTIFY TEAM        │  🚀 DEPLOY               │
-         │  │  📊 GENERATE REPORT    │  📊 GENERATE REPORT     │
+         │  │   FAIL BUILD           │   CONTINUE              │
+         │  │   NOTIFY TEAM          │   DEPLOY                │
+         │  │   GENERATE REPORT      │   GENERATE REPORT       │
          └─────────────────────────────────────────────────────┘
 ```
 
@@ -327,7 +327,7 @@ CRITICAL_COUNT=$(jq '[.results[] | select(.extra.severity=="ERROR")] | length' $
 
 if [ "$CRITICAL_COUNT" -gt 0 ]; then
     # In a real pipeline, send to Slack, email, or ticketing system
-    echo "🚨 SECURITY ALERT 🚨"
+    echo "SECURITY ALERT"
     echo "Pipeline: DevSecOps Tutorial"
     echo "Repository: devsecops-pipeline-tutorial"
     echo "Critical Vulnerabilities: $CRITICAL_COUNT"
@@ -360,9 +360,9 @@ echo "=== DEVSECOPS SECURITY METRICS ==="
 echo "Date: $(date)"
 echo ""
 echo "SCAN COVERAGE:"
-echo "- SAST Enabled: ✅"
-echo "- Dependency Scan Enabled: ✅" 
-echo "- Container Scan Enabled: ✅"
+echo "- SAST Enabled: "
+echo "- Dependency Scan Enabled: " 
+echo "- Container Scan Enabled: "
 echo ""
 echo "CURRENT SECURITY POSTURE:"
 echo "- Total Vulnerabilities: $(jq '.results | length' semgrep-results.json 2>/dev/null || echo "N/A")"
