@@ -52,15 +52,79 @@ Let's run a comprehensive dependency scan:
 
 ```bash
 # Generate HTML and JSON reports
+# Try the real dependency-check tool first
 ./dependency-check/bin/dependency-check.sh \
   --project VulnShop \
   --scan vulnerable-app/ \
-  --format "HTML,JSON,SARIF" \
+  --format HTML \
+  --format JSON \
+  --format SARIF \
   --out dep-check-reports \
   --prettyPrint
 ```{{exec}}
 
 This will take a few minutes as it downloads the CVE database and analyzes dependencies.
+
+**If the above command fails with 403 Forbidden errors** (common due to NVD rate limiting), use this fallback approach:
+
+```bash
+# Fallback: Create mock dependency scan results for tutorial purposes
+echo "Creating mock dependency scan results due to NVD access issues..."
+
+mkdir -p dep-check-reports
+cat > dep-check-reports/dependency-check-report.json << 'EOF'
+{
+  "dependencies": [
+    {
+      "fileName": "urllib3-1.26.5.dist-info",
+      "vulnerabilities": [
+        {
+          "name": "CVE-2023-45853",
+          "severity": "HIGH",
+          "cvssV3": {"baseScore": 7.5},
+          "description": "urllib3 before 2.0.7 allows CRLF injection if the attacker controls the HTTP request method."
+        }
+      ]
+    },
+    {
+      "fileName": "pyyaml-5.4.1.dist-info", 
+      "vulnerabilities": [
+        {
+          "name": "CVE-2020-14343",
+          "severity": "CRITICAL",
+          "cvssV3": {"baseScore": 9.8},
+          "description": "A vulnerability was discovered in the PyYAML library in versions before 5.4, where it is susceptible to arbitrary code execution."
+        }
+      ]
+    },
+    {
+      "fileName": "pillow-8.3.2.dist-info",
+      "vulnerabilities": [
+        {
+          "name": "CVE-2022-22817",
+          "severity": "MEDIUM",
+          "cvssV3": {"baseScore": 5.5},
+          "description": "Pillow before 9.0.0 allows denial of service via SAMPLESIZE in TiffDecode.c."
+        }
+      ]
+    },
+    {
+      "fileName": "cryptography-3.4.8.dist-info",
+      "vulnerabilities": [
+        {
+          "name": "CVE-2023-23931",
+          "severity": "HIGH",
+          "cvssV3": {"baseScore": 7.4},
+          "description": "cryptography package before 39.0.0 allows attackers to cause a denial of service."
+        }
+      ]
+    }
+  ]
+}
+EOF
+
+echo "Mock dependency scan results created successfully"
+```{{exec}}
 
 ## Analyzing Dependency Scan Results
 
@@ -134,7 +198,7 @@ HIGH_CRITICAL=$(jq '[.dependencies[].vulnerabilities[] | select(.severity == "HI
 echo "High/Critical vulnerabilities found: $HIGH_CRITICAL"
 
 if [ "$HIGH_CRITICAL" -gt 0 ]; then
-  echo "🚨 SECURITY GATE FAILED: High/Critical dependency vulnerabilities detected"
+  echo " SECURITY GATE FAILED: High/Critical dependency vulnerabilities detected"
   echo ""
   echo "Vulnerable packages:"
   jq -r '.dependencies[] | select(.vulnerabilities) | 
@@ -196,9 +260,11 @@ echo "Suppression file example created. Use with: --suppression example-suppress
 Key options used in CI:
 
 - `--failOnCVSS 7.0` fail pipeline on high/critical issues (CVSS ≥ 7.0)
-- `--format HTML,JSON,SARIF` produce rich reports for different tools
+- `--format HTML --format JSON --format SARIF` produce rich reports for different tools
 - `--out reports/dependency-check` save artifacts for review
 - `--suppression suppressions.xml` ignore known false positives
+
+**Note**: The tutorial tries the real dependency-check tool first. If it fails due to NVD access restrictions (403 errors), the fallback mock data approach ensures you can still learn the concepts. In production environments, you would configure proper CVE database access or use alternative data sources.
 
 ## Easter Egg Clue #2
 
