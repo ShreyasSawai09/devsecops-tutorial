@@ -36,7 +36,6 @@ First, let's install Java (required for Dependency-Check) and then the OWASP Dep
 
 Install Java (required for dependency-check)
 ```bash
-sudo apt update
 sudo apt install -y openjdk-11-jdk
 ```{{exec}}
 

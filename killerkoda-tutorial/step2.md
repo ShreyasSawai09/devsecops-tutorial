@@ -270,24 +270,6 @@ grep -c "debug.*True" app.py run.py
 
 **What you should see:** The number of places where debug mode is enabled, which is dangerous in production.
 
-### Security Scanning Preparation
-
-Before we move on to automated scanning, let's verify that all our security tools are properly installed and ready:
-
-Verifying security tool availability:
-```bash
-echo "Semgrep (SAST): $(which semgrep >/dev/null && echo 'Ready' || echo 'Missing')"
-echo "OWASP DC (SCA): $(which dependency-check >/dev/null && echo 'Ready' || echo 'Missing')"
-echo "Grype (Container): $(which grype >/dev/null && echo 'Ready' || echo 'Missing')"
-```{{exec}}
-
-**What you should see:** Status for each tool showing either "Ready" (if installed) or "Missing" (if not yet installed). This helps us identify any setup issues before proceeding.
-
-**What each tool does:**
-- **Semgrep (SAST)**: Analyzes source code for security vulnerabilities
-- **OWASP Dependency Check (SCA)**: Scans dependencies for known vulnerabilities  
-- **Grype (Container)**: Scans container images for security issues
-
 ## Key Learning Outcomes
 
 From this exploration, you now understand:
