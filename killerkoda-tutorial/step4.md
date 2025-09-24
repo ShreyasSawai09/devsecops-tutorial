@@ -232,20 +232,19 @@ chmod +x dependency-security-gate.sh
 When vulnerabilities are found, here are common remediation approaches:
 
 ### 1. Direct Dependency Updates
-```bash
-echo "=== DEPENDENCY REMEDIATION GUIDE ==="
-echo ""
-echo "For direct dependencies (in requirements.txt):"
-echo "1. Update to latest secure version:"
-echo "   pip install --upgrade package_name"
-echo "2. Pin to specific secure version:"
-echo "   package_name==X.Y.Z"
-echo ""
-echo "For transitive dependencies:"
-echo "1. Update parent dependency"
-echo "2. Add explicit pin for transitive dependency"
-echo "3. Use dependency resolution tools like pip-tools"
-```{{exec}}
+
+=== DEPENDENCY REMEDIATION GUIDE ===
+
+For direct dependencies (in requirements.txt):
+1. Update to latest secure version:
+   pip install --upgrade package_name
+2. Pin to specific secure version:
+   package_name==X.Y.Z
+
+For transitive dependencies:
+1. Update parent dependency
+2. Add explicit pin for transitive dependency
+3. Use dependency resolution tools like pip-tools
 
 ### 2. Vulnerability Suppression
 For false positives or accepted risks, create suppression rules:

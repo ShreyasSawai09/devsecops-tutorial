@@ -422,31 +422,30 @@ chmod +x executive-summary.sh
 
 Congratulations! You've found all the clues. The easter egg is a hidden admin backdoor:
 
-```bash
-echo "[EASTER EGG DISCOVERED!]"
-echo ""
-echo "The Hidden Vulnerability Chain:"
-echo "1. Hardcoded secret key (SAST finding) = 'super-secret-key-123'"
-echo "2. Admin pickle deserialization endpoint (SAST finding) = '/deserialize'"  
-echo "3. Vulnerable dependencies (Dependency Check) = Enable exploitation"
-echo "4. Container base image vulns (Grype) = Lateral movement potential"
-echo ""
-echo "[SECRET] The Secret Backdoor:"
-echo "When you combine the hardcoded secret with the pickle deserialization"
-echo "vulnerability and admin access, you can achieve remote code execution!"
-echo ""
-echo "Exploitation would involve:"
-echo "• Using the known secret key to forge admin sessions"
-echo "• Crafting malicious pickle payloads for /deserialize endpoint"  
-echo "• Leveraging vulnerable dependencies for persistence"
-echo "• Using container vulnerabilities for privilege escalation"
-echo ""
-echo "This demonstrates why DevSecOps scanning is crucial - individual"
-echo "vulnerabilities become much more dangerous when chained together!"
-echo ""
-echo "[ACHIEVEMENT] Achievement Unlocked: Master Security Scanner!"
-echo "You've successfully implemented a complete DevSecOps security pipeline!"
-```{{exec}}
+[EASTER EGG DISCOVERED!]
+
+The Hidden Vulnerability Chain:
+1. Hardcoded secret key (SAST finding) = 'super-secret-key-123'
+2. Admin pickle deserialization endpoint (SAST finding) = '/deserialize'  
+3. Vulnerable dependencies (Dependency Check) = Enable exploitation
+4. Container base image vulns (Grype) = Lateral movement potential
+
+[SECRET] The Secret Backdoor:
+When you combine the hardcoded secret with the pickle deserialization
+vulnerability and admin access, you can achieve remote code execution!
+
+Exploitation would involve:
+• Using the known secret key to forge admin sessions
+• Crafting malicious pickle payloads for /deserialize endpoint  
+• Leveraging vulnerable dependencies for persistence
+• Using container vulnerabilities for privilege escalation
+
+This demonstrates why DevSecOps scanning is crucial - individual
+vulnerabilities become much more dangerous when chained together!
+
+[ACHIEVEMENT] Achievement Unlocked: Master Security Scanner!
+You've successfully implemented a complete DevSecOps security pipeline!
+
 
 ## Continuous Security Improvement
 
