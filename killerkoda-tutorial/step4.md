@@ -326,9 +326,3 @@ EOF
 chmod +x dependency-summary.sh
 ./dependency-summary.sh
 ```{{exec}}
-
-When done, run the verifier for this step:
-
-```bash
-./killerkoda-tutorial/step4-verify.sh
-```{{exec}}

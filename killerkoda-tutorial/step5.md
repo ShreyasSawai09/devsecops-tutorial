@@ -360,9 +360,3 @@ echo "- Prometheus metrics from scan results"
 echo "- Grafana dashboards for vulnerability trends"
 echo "- Alert manager for critical findings"
 ```{{exec}}
-
-When done, run the verifier for this step:
-
-```bash
-./killerkoda-tutorial/step5-verify.sh
-```{{exec}}
