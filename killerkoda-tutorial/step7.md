@@ -44,11 +44,19 @@ echo ""
 # Dependency Scan Results  
 echo " DEPENDENCY VULNERABILITY SCANNING - OWASP Dependency Check"
 echo "════════════════════════════════════════════════════════════════"
-if [ -f dependency-check-report/dependency-check-report.json ]; then
+if [ -f dep-check-reports/dependency-check-report.json ]; then
+    TOTAL_DEPS=$(jq '.dependencies | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
+    VULN_DEPS=$(jq '[.dependencies[] | select(.vulnerabilities)] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
+    CRITICAL_DEPS=$(jq '[.dependencies[].vulnerabilities[] | select(.severity == "CRITICAL")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
+    HIGH_DEPS=$(jq '[.dependencies[].vulnerabilities[] | select(.severity == "HIGH")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
+    MEDIUM_DEPS=$(jq '[.dependencies[].vulnerabilities[] | select(.severity == "MEDIUM")] | length' dep-check-reports/dependency-check-report.json 2>/dev/null || echo "0")
+    
     echo "Status:  VULNERABILITIES FOUND"
-    echo "Vulnerable Dependencies: $(jq '.dependencies | length' dependency-check-report/dependency-check-report.json 2>/dev/null || echo "N/A")"
-    echo "├── High Severity: TBD"
-    echo "└── Medium Severity: TBD"
+    echo "Total Dependencies: $TOTAL_DEPS"
+    echo "Vulnerable Dependencies: $VULN_DEPS"
+    echo "├── Critical: $CRITICAL_DEPS"
+    echo "├── High: $HIGH_DEPS"
+    echo "└── Medium: $MEDIUM_DEPS"
 else
     echo "Status:  NOT SCANNED"
     echo "Note: Dependency scan results would show vulnerable packages"
@@ -59,8 +67,8 @@ echo ""
 # Container Scan Results
 echo " CONTAINER IMAGE SCANNING - Grype"  
 echo "════════════════════════════════════════════════════════════════"
-if [ -f grype-report.json ]; then
-    CONTAINER_VULNS=$(jq '.matches | length' grype-report.json 2>/dev/null || echo "0")
+if [ -f grype-results.json ]; then
+    CONTAINER_VULNS=$(jq '.matches | length' grype-results.json 2>/dev/null || echo "0")
     echo "Status:  VULNERABILITIES FOUND"
     echo "Container Vulnerabilities: $CONTAINER_VULNS"
 else
